@@ -1,21 +1,23 @@
 module Site.Html.Base where
 
-import           Data.Text                   (Text)
+
 import qualified Data.Text                   as T
-import           Text.Blaze.Html5            as H
-import           Text.Blaze.Html5.Attributes as A
+import           RIO
+import           Text.Blaze.Html             ( Html )
+import           Text.Blaze.Html5            ( (!) )
+import qualified Text.Blaze.Html5            as H
+import qualified Text.Blaze.Html5.Attributes as A
 
 
-
-pageSkeleton :: H.Html5 -> H.Html5
+pageSkeleton :: Html -> Html
 pageSkeleton content = 
     H.docTypeHtml $
-        H.Html $ do
+        H.html $ do
             siteWideHead
             pageContentWrapper content
 
 
-pageContentWrapper :: H.Html5 -> H.Html5
+pageContentWrapper :: Html -> Html
 pageContentWrapper content = 
     H.body $ do
         H.div ! A.class_ "site-wide-wrapper" $ do
@@ -26,20 +28,20 @@ pageContentWrapper content =
 
         siteWideFooter
             
-siteWideNav :: Html5
+siteWideNav :: Html
 siteWideNav = H.nav ! A.class_ "site-head-nav" $
     H.ul $ do
         H.li ! A.class_ "nav-item" $
-            H.a ! A.href="/posts" $ "Blog"
+            H.a ! A.href "/posts" $ "Blog"
         H.li ! A.class_ "nav-item" $
-            H.a ! A.href="/projects" $ "Projects"
+            H.a ! A.href "/projects" $ "Projects"
         H.li ! A.class_ "nav-item" $
-            H.a ! A.href="/about" $ "About"
+            H.a ! A.href "/about" $ "About"
         H.li ! A.class_ "nav-item" $
-            H.a ! A.href="/contact" $ "Contact"
+            H.a ! A.href "/contact" $ "Contact"
 
 
-siteWideContentHead :: H.Html
+siteWideContentHead :: Html
 siteWideContentHead = H.header ! A.class_ "site-wide-head" $ do
     H.div ! A.class_ "site-head-logo" $ do
         H.div ! A.class_ "logo-left" $ "ekadanta"
@@ -47,7 +49,7 @@ siteWideContentHead = H.header ! A.class_ "site-wide-head" $ do
     siteWideNav
 
 
-siteWideHead :: H.Html5
+siteWideHead :: Html
 siteWideHead = H.head $ do
     H.title "Ekadanta.co / erik aker"
     H.meta ! A.name "viewport" ! A.content "width=device-width, initial-scale=1"
@@ -58,17 +60,19 @@ siteWideHead = H.head $ do
     H.link ! A.href "/static/css/skeleton.css" ! A.rel "stylesheet" ! A.type_ "text/css"
     H.link ! A.href "/static/highlight/styles/default.css" ! A.rel "stylesheet" ! A.type_ "text/css"
     H.link ! A.href "/static/css/styles.css" ! A.rel "stylesheet" ! A.type_ "text/css"
-    H.script ! A.type_ "text/javascript" ! A.src "static/highlight/highlight.pack.js"
+    H.script ! A.type_ "text/javascript" ! A.src "static/highlight/highlight.pack.js" $ ""
 
 
-siteWideFooter :: Int -> H.Html5
-siteWideFooter year = H.footer $ do
-    H.p ! A.class_ "footer-copyright" $ "Ekadanta.co Copyright (c) " <> show year <> " Erik Aker"
-    H.p ! A.class_ "footer-attribution" $ "Site designed by " $
+siteWideFooter :: Html
+siteWideFooter = H.footer $ do
+    H.p ! A.class_ "footer-copyright" $ "Ekadanta.co Copyright (c) 2018 Erik Aker"
+    H.p ! A.class_ "footer-attribution" $ do
+        void "Site designed by "
         H.a ! A.href "" $ "Jonathan Whitmire"
-    H.p ! A.class_ "footer-footenote" $ "This site is" $
+    H.p ! A.class_ "footer-footenote" $ do
+        void "This site is"
         H.a ! A.href "" $ "open source"
-    googAnalytics
+    H.script $ H.text googAnalytics
     
 
 googAnalytics :: T.Text

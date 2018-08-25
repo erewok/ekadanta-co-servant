@@ -2,11 +2,13 @@
 
 module Site.Types where
 
-import Control.Lens
-import Data.Aeson
-import Data.Time.LocalTime
-import GHC.Generics
-import RIO
+import           Control.Lens
+import           Data.Aeson
+import           Data.Time.LocalTime
+import           GHC.Generics
+import           RIO
+import qualified Text.Blaze.Html5            as H
+
 
 data ResourceType = BlogPost
                    | About
@@ -25,6 +27,7 @@ data Resource = Resource {
     , _lede  :: Maybe Text
     , _tags :: [Text]
     , _published :: Bool
+    , _pid :: Text
 } deriving (Eq, Show, Generic)
 
 instance FromJSON Resource

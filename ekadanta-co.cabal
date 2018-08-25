@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: a28650cd454ba4136f5053142477e137ddcf815c362766347d2b043be1892c61
+-- hash: 77526e34970e295709d2609a422d771f13fae41687014ffad33eab91c50df409
 
 name:           ekadanta-co
 version:        0.1.0.0
@@ -28,9 +28,12 @@ library
   exposed-modules:
       Site
       Site.AdminResources
+      Site.Html.Base
+      Site.Html.ContentDetail
+      Site.Html.ContentList
+      Site.Html.Home
       Site.PublicResources
       Site.Search
-      Site.Templates
       Site.Types
   other-modules:
       Paths_ekadanta_co
