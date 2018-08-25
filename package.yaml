@@ -1,0 +1,75 @@
+name:                ekadanta-co
+version:             0.1.0.0
+github:              "erewok/ekadanta-co"
+license:             BSD3
+author:              "Author name here"
+maintainer:          "eraker@gmail.com"
+copyright:           "2018 Erik aker"
+
+extra-source-files:
+- README.md
+- ChangeLog.md
+
+# Metadata used when publishing your package
+# synopsis:            Short description of your package
+# category:            Web
+
+# To avoid duplicated efforts in documentation and dealing with the
+# complications of embedding Haddock markup inside cabal files, it is
+# common to point users to the README.md file.
+description:         Please see the README on GitHub at <https://github.com/erewok/ekadanta-co#readme>
+
+dependencies:
+- base >= 4.7 && < 5
+- aeson
+- blaze-html
+- bloodhound
+- bytestring
+- envy
+- lens
+- servant
+- servant-blaze
+- servant-server
+- rio
+- text
+- time
+- wai
+
+default-extensions:
+  - DeriveGeneric
+  - GADTs
+  - InstanceSigs
+  - LambdaCase
+  - NoImplicitPrelude
+  - OverloadedStrings
+  - RecordWildCards
+  - ScopedTypeVariables
+  - UnicodeSyntax
+
+library:
+  source-dirs: src
+
+executables:
+  ekadanta-co:
+    main:                Main.hs
+    source-dirs:         app
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - ekadanta-co
+    - wai
+    - wai-extra
+    - warp
+
+tests:
+  ekadanta-co-test:
+    main:                Spec.hs
+    source-dirs:         test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - ekadanta-co

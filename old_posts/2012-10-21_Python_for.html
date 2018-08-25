@@ -1,0 +1,39 @@
+For me as for many others, the post-workday interval between swimming and dinner is traditionally occupied by little games, articles, wasting time on the internet, many of which are postprandially continued.
+
+These routines were altered recently when a friend suggested I learn the programming language Python. I dismissed the thought (Me? Programming? Math sounds like the worst thing I could possibly do with my free time...) but I overcame my suspicion, dipped my toe into the water and have only a few months later decided to come up for air.
+
+Now, I have been a Linux user for the past eight years, so I had been previously inured to the command-line and writing small scripts, but my previous attempts at real programming have all failed, however, as one or another language (Perl, ruby, java) seemed inutile to my needs, or, worse, boring.
+
+I really fell in love with Python, though. It's probably because as someone used to working with text, Python's emphasis on whitespace as a delimiter of code (tabs and spaces separate blocks of code) made it feel readable and intuitive to me.  What really hooked me, though, was that while engaging and diverting, Python provides that familiar and temporary feeling of satisfaction that comes with solving a puzzle, like those between-swimming-and-dinner puzzles I used to play with. Actually, you can really feel it inside the brain tapping the same space used for something like crossword puzzles, the little Kantian artifacts and cogs and gears warming up to solve the problems of for-loops and Boolean tests.
+
+Anyway, my interest in Python has recently gotten so bad that it's taken time away from my reading! This made me nervous because I've got two dozen books on my "to read" bookshelf at the moment, but my panic subsided when I realized I could make Python read for me. Or, at least, I could have it read texts in ways that I am unable to. In fact, aside from being a fun puzzle, coding has another payoff: it provides access to incredible reams of information. When given hard tasks, it doesn't cheat, either: for instance, I can tell Python to go out and count how many times the word "asshole" appears in all Presidential inaugural addresses and it will diligently, like an idiot, go out and perform the count for me!
+
+This a nonsense example, of course, because any sensible American knows to confine such a search to just the Bush years. Nevertheless, for more useful (to your taste) textual searches, there is a downloadable module for Python called the "Natural Language Toolkit" (nltk, for short), which has been developed for analyzing and parsing human language. Upon downloading this  module, you can import various books from various "corpora" which come with the module. Thus, for instance:
+<pre>import nltk.corpus
+from nltk.text import Text
+moby = Text(nltk.corpus.gutenberg.words('melville-moby_dick.txt'))</pre>
+Putting these commands at the beginning of a Python program allows me to assign the full text of <em>Moby Dick</em> as a list of words to a Python object I've created called "moby". In short, I just told my computer to read the whole book and keep it at the ready because I'm about to start quizzing it.
+
+With my "moby" object, I can now count word frequency, look at the whole length of the text, examine the total lexical diversity of the text (how often each word appears on average) and even more. (See <a title="Google code book on nltk" href="http://nltk.googlecode.com/svn/trunk/doc/book/ch01.html" target="_blank">this googlecode book</a> for a great introduction to using nltk). I can even import it differently and examine the "raw" text, including spaces and punctuation and analyze the average word length of the text. There are many other tools available within nltk and I can even analyze my own texts if I want (do I dare?).
+
+Google is one of the major backers of this kind of work because they have a lot invested in making their search engine read text more intuitively, in order to return better results to users as well as to better translate results for users.  The thinking, and I am in this boat, is that the more people are hacking together programs to play with and ask interesting questions about language, the better we can get computers to understand what we're saying and typing. (Sounds like the beginning of some sci-fi apocalypta...)
+
+(By the way, while I like this idea, the thing I also love about language is the experimentation it provides. That's why I just made up that word "apocalypta", in order to throw off the computers...)
+
+Anyway, my next project is to figure out how to analyze texts for parts of speech (what are the most commonly used verbs in<em> Moby Dick</em>, for instance?). Undoubtedly, someone has already figured out how to get close to answering this question, but I'll have to puzzle out the answer on my own, in order to stay interested.
+
+My new project gets to some of the questions that have kept me reading over the years. In fact, one of the things I've always loved about reading books is finding patterns and using those patterns to see the universe of the book in new and interesting ways. This, to my thinking, is what the critical analysis of texts is all about. Further, I am convinced that future academics and writers will take some coding with their degrees because such questions as coding allows us to ask will become integral to the study of texts and linguistics.
+
+For my part, it feels like my computer can be my new friend for reading books: it adds a fresh layer of pleasure and inquiry to the exercise of reading. If only I can find the time to put the computer down and go back to reading...
+
+&nbsp;
+
+(Of course, I also like to go outside sometimes:
+
+[caption id="attachment_738" align="aligncenter" width="300"]<a href="http://erikaker.com/wp-content/uploads/2012/10/erik_surf_closeup.jpg"><img class="size-medium wp-image-738" title="erik_surf_closeup" src="http://erikaker.com/wp-content/uploads/2012/10/erik_surf_closeup-300x146.jpg" alt="surfing in la jolla" width="300" height="146" /></a> The author surfing in la jolla[/caption]
+
+Footnote: If anybody wants to learn Python programming, there are some great tutorials and websites to get you started. I recommend the following
+<ul>
+	<li><a title="Learn Python the Hard Way" href="http://learnpythonthehardway.org/book/" target="_blank">Learn Python the Hard Way</a></li>
+	<li><a title="Google Python Class" href="http://code.google.com/edu/languages/google-python-class/index.html" target="_blank">Google's Code Academy</a></li>
+</ul>

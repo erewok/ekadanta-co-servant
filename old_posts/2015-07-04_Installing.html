@@ -1,0 +1,145 @@
+<p>I like Webfaction as a shared host because they seem to work with an attitude supportive to developers. Because of this, I decided I'd try to install a recent GHC in order try to start getting some Haskell code working on this site. This post is an explanation of what it took to get a working Haskell environment.</p>
+
+<p>Firstly, there are <a href="https://community.webfaction.com/questions/5084/building-ghc-from-source">some rather old instructions on Webfaction for installing ghc6 and then ghc7.4 from source</a>. In addition, there is a blog post linked variously that fails to resolve. For my own part, I wanted to go with a more modern version, so after scrabbling around today, I figured out how to do it and figured I would share. </p>
+
+<p class="alert alert-warning"><b>Note</b>: I must mention that I exceeded my allotted memory for my Webfaction account while running this and I was dumped from my ssh session and my site went down. With the site down, I had enough memory, but I had to log back in to finish the setup and then restart the site. Thus, <b>the author of this post assumes no responsibility for anyone running the following on their own: caveat emptor!</b></p>
+
+<p>First, I created a tmp directory to download stuff into: </p>
+
+<pre><code class="hljs bash">$ mkdir ~/tmp
+$ cd ~/tmp
+</code></pre>
+
+<p>Then I tried to download and install ghc-7.10, but it wouldn't configure due to an error:</p>
+
+<blockquote>error: checking for path to top of build tree... utils/ghc-pwd/dist-install/build/tmp/ghc-pwd: error while loading shared libraries: libgmp.so.10: cannot open shared object file: No such file or directory
+configure: error: cannot determine current directory</blockquote>
+
+<h3 id="gmp">GMP</h3>
+
+<p>It turns out we need a numerical arbitrary precision library called GMP to install this version of GHC (any version after 7.4, in fact). But we can't merely run "sudo apt-get install...", so here's what I did to sort that out (from inside ~/tmp directory):</p>
+ 
+<pre><code class="hljs bash">$ mkdir ~/devel
+$ mkdir ~/devel/bin
+$ wget https://ftp.gnu.org/gnu/gmp/gmp-6.0.0a.tar.bz2
+$ tar xvf gmp-6.0.0a.tar.bz2
+$ cd gmp-6.0.0
+$ ./configure --prefix=$HOME/devel
+$ make
+$ make install
+$ cd ~/tmp
+</code></pre>
+
+<p>Okay, now that that's installed, we'll need to give ghc-7.10 a way to find the missing library when we attempt to configure it. That's pretty easy, actually:</p>
+
+<pre><code class="hljs bash">$ export LD_LIBRARY_PATH=$HOME/devel/lib</code></pre>
+
+<p>However, GHC is going to need this every time it wants to run, so you should add this line to your ~/.bashrc. To make things easier later on, we're also going to add our new $HOME/devel/bin executables to our PATH, so when we type `ghc`, it should use the executable in ~/devel/bin.</p>
+
+<p>Use your favorite editor to edit ~/.bashrc and add the following lines to:</p>
+
+<pre><code class="hljs bash">export LD_LIBRARY_PATH=$HOME/devel/lib
+export PATH=$PATH:$HOME/bin:$HOME/devel/bin</code></pre>
+
+<p>Save the file, exit the editor, and source the file:</p>
+
+<pre><code class="hljs bash">$ source ~/.bashrc</code></pre>
+
+<h3 id="ghc">Install GHC 7.10</h3>
+
+<p>With that dependency out of the way, now we can configure and install ghc-7.10</p>
+
+<pre><code class="hljs bash">$ wget https://www.haskell.org/ghc/dist/7.10.1/ghc-7.10.1-x86_64-unknown-linux-deb7.tar.bz2
+$ tar xvf ghc-7.10.1-x86_64-unknown-linux-deb7.tar.bz2 
+$ cd ghc-7.10.1
+$ ./configure --prefix=$HOME/devel
+$ make install
+$ cd ~/tmp
+</code></pre>
+
+<p>And that's it: now we have a working 7.10 inside our ~/devel/bin. But it would be much nicer to also have cabal (library and install) to manage stuff for us, so we'll need that too. In fact, I'm a big fan of the <a href="https://github.com/commercialhaskell/stack">FP Complete library Stack</a>, so I'm going to build the minimum required environment to be able to run Stack and have it install everything for me. </p>
+
+<h3 id="cabal-library"> Cabal Library</h3>
+
+<p>To get Stack running, I'll get Cabal library, which Stack requires, following the instructions in the Cabal library README:</p>
+
+<pre><code class="hljs bash">$ wget https://www.haskell.org/cabal/release/cabal-1.22.4.0/Cabal-1.22.4.0.tar.gz
+$ tar xvf Cabal-1.22.4.0.tar.gz 
+$ cd Cabal-1.22.4.0
+$ ghc --make Setup
+$ ./Setup configure --user --prefix=$HOME/devel
+$ ./Setup build
+$ ./Setup install
+$ cd ~/tmp
+</code></pre></div>
+
+<p>The README.md says to run the `--make Setup` command threaded, but this is shared-hosting and the first time I tried these commands, I got axed from my ssh session, which I believe is because I was being too noisy of a neighbor. </p>
+
+<h3 id="cabal-install"> Cabal Install</h3>
+
+<p>Anyway, now that we have the Cabal library, I can get cabal-install and install that as well:</p>
+
+<pre><code class="hljs bash">$ wget https://www.haskell.org/cabal/release/cabal-install-1.22.6.0/cabal-install-1.22.6.0.tar.gz
+$ tar xvf cabal-install-1.22.6.0.tar.gz 
+$ cd cabal-install-1.22.6.0
+</code></pre>
+
+<p>The README says to just use the bootstrap script, which worked fine for me:</p>
+
+<pre><code class="hljs bash">$ ./bootstrap.sh
+$ cd ~/tmp
+</code></pre>
+
+<p>After it installs, it tells me: </p>
+
+<blockquote>
+The 'cabal' program has been installed in ~/.cabal/bin/
+You should either add ~/.cabal/bin to your PATH
+or copy the cabal program to a directory that is on your PATH.
+</blockquote>
+
+<p>Okay, so I'll copy to my ~/devel/bin directory:</p>
+
+<pre><code class="hljs bash">$ cp ~/.cabal/bin/cabal ~/devel/bin/
+</code></pre>
+
+<p>Eventually, I'll have to either add ~/.cabal/bin to path or copy every library that gets installed to it into my ~/devel/bin directory. </p>
+
+<h3 id="stack">Install Stack </h3>
+
+<p>Anyway, after all that, now I should be able to build stack! First we download and unpack it:</p>
+
+<pre><code class="hljs bash">$ wget https://github.com/commercialhaskell/stack/releases/download/v0.1.1.0/stack-0.1.1.0-x86_64-linux.gz
+$ tar xvf stack-0.1.1.0-x86_64-linux.gz
+$ cd stack-0.1.1.0/
+</code></pre>
+
+<p>Then we run `cabal update` for the first time and install Stack:</p>
+
+<pre><code class="hljs bash">$ cabal update
+$ cabal install
+</code></pre>
+
+<p>Now we can build whatever we want without worring about Cabal hell, right! Well, not so fast. Some of the dependencies throw errors that look like this:</p>
+
+<blockquote>
+distributive-0.4.4 failed during the configure step. The exception was:
+/tmp/cabal-tmp-776436/distributive-0.4.4/dist/setup/setup: runProcess:
+runInteractiveProcess: exec: permission denied (Permission denied)</blockquote>
+
+<p>Webfaction is a shared hosting provider, so they lock down various directories, including /tmp. Cabal by default uses that directory to download and execute code from (which I figured out <a href="http://ryanglscott.github.io/2014/07/16/installing-ghc-on-freebsd/">due to this post</a>. Thus, to be able to build libraries with Cabal, we'll need to get it to use our $HOME/tmp directory, so it can run code as our user. </p>
+
+<p>Edit your ~/.bashrc file again and add the following line:</p>
+
+<pre><code class="hljs bash">export TMPDIR=$HOME/tmp
+</code></pre>
+
+<p>Exit the editor, source ~/.bashrc and cabal install should now work:</p>
+
+<pre><code class="hljs bash">$ source ~/.bashrc
+$ cabal install
+</code></pre>
+
+<p>Success! The above command will install the stack executable into ~/.cabal/bin (remember the note above?), so I'll have to also add it to me ~/devel/bin PATH.</p>
+
+<p>At any rate, Stack is now working with GHC-7.10 and we can install all kinds of haskell stuff including Yesod, Scotty, Spock, and anything else we'd like to try!</p>

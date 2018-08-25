@@ -1,0 +1,128 @@
+<p>Now that <a href="http://blog.rust-lang.org/2015/05/15/Rust-1.0.html">Rust has hit 1.0 stable</a>, I thought I'd give the language a look this weekend and see how it's put together. In general, the last thing I need for a project is to attempt to learn another programming language, but Rust has some excellent things to recommend it, including the best <a href="https://doc.rust-lang.org/book/">introductory manual</a> I've ever read for a programming language. </p>
+
+<p>In order to get myself familiar with the language, I figured I'd give a prime number generator a shot. This is my go-to, first attempt in any new language, most likely because of the fond memories I have of learning to think programmatically via <a href="https://projecteuler.net/">Project Euler</a>.
+
+<p>For my first attempt, I went with a simple trial division, which is grossly over-simplified:
+
+<pre>
+<code class="hljs rust">
+fn is_prime(number: &i64) -> bool {
+    let limit = ((*number as f64).sqrt() + 1.0) as i64;
+    if *number == 2 || *number == 3{
+        return true
+    }
+    for x in (2..limit) {
+        if number % x == 0 {
+            return false
+        }
+    }
+    true
+}
+
+pub fn prime_list(limit: &i64) -> Vec<i64> {
+    let mut ps: Vec<i64> = vec![2];
+    for x in (3..*limit) {
+        if is_prime(&x) {
+            ps.push(x);
+        }
+    }
+    ps
+}
+
+#[cfg(test)]
+mod tests {
+    use super::is_prime;
+    use super::prime_list;
+
+    #[test]
+    fn test_is_prime() {
+        let x: i64 = 17;
+        let y: i64 = 2;
+        let z: i64 = 3;
+        assert!(is_prime(&x));
+        assert!(is_prime(&y));
+        assert!(is_prime(&z));
+    }
+
+    #[test]
+    fn test_is_not_prime() {
+        let n: i64 = 65;
+        let o: i64 = 10;
+        assert_eq!(is_prime(&n), false);
+        assert_eq!(is_prime(&o), false);
+    }
+
+    #[test]
+    fn test_list_primes() {
+        let limit: i64 = 12;
+        let expected: Vec<i64> = vec![2, 3, 5, 7, 11];
+        assert_eq!(expected, prime_list(&limit));
+    }
+}
+</code>
+</pre>
+
+<p>First of all, it probably goes without saying, but if you stumble on this post and want to use this code for something (and you are possibly drunk or only half paying attention), it's probably a bad idea. Okay, with that disclaimer out of the way, I can mention a few things. </p>
+
+<p>First of all, I wanted to use `step_by`, a range method, but couldn't get the code to compile due to the error that this is a recent addition and unstable. Secondly, it was surprisingly easy to write this in an imperative style similar to what I might attempt in Python.</p>
+
+<p>Thirdly, the build tool <b>cargo</b> is all kinds of awesome: easy to start new projects with, easy to run tests with, and easy to run your application with. In addition, the tendency is to write test modules in the same file as the functionality you are testing and to simply decorate them with `#[test]`.</p>
+
+<p>One other awesome thing: Rust has its own Rustdoc system (like Sphinx or javadoc), but you write docstrings as comments (with three slashes), and you write them in Markdown. That is awesome.</p>
+
+<p>On the whole I'm really impressed with the language and after my first quick foray this morning, I attempted a Sieve of Eratosthenes version this evening, but while my first attempt to could find primes in the neighborhood of about 1,000,000 without being painfully slow, my Sieve version can't really do that. I was hoping to figure out how to assemble and modify iterators, so I could write a more Haskell-style sieve, but failed to do so, and as a result I have these nasty `collect()`s polluting everything:
+
+<pre>
+<code class="hljs rust">
+fn knockout(primes: Vec<i64>) -> Vec<i64> {
+    let mut cp = primes.clone();
+    let first = cp.remove(0);
+    if cp.len() > 0 {
+        cp = cp.into_iter().filter(|&i| i % first != 0).collect();
+    }
+    cp
+}
+
+pub fn sieve_primes(number: i64) -> Vec<i64> {
+    let mut list = vec![2, 3];
+    let mut prime_list = knockout((3..number)
+                                  .filter(|&i| i % 2 != 0)
+                                  .collect());
+    while prime_list.len() > 0 {
+        list.push(prime_list[0]);
+        prime_list = knockout(prime_list);
+
+    }
+    for x in &list {
+        println!("{}", &x);
+    }
+    list
+}
+
+#[cfg(test)]
+mod tests {
+    use super::sieve_primes;
+
+
+    #[test]
+    fn test_list_primes() {
+        let limit: i64 = 20;
+        let expected: Vec<i64> = vec![2, 3, 5, 7, 11, 13, 17, 19];
+        assert_eq!(expected, sieve_primes(limit));
+    }
+
+    #[test]
+    fn test_first_hundred_primes() {
+        let limit: i64 = 100;
+        let expected: Vec<i64> = vec![2, 3, 5, 7, 11, 13, 17, 19, 23,
+                                      29, 31, 37, 41, 43, 47, 53, 59,
+                                      61, 67, 71, 73, 79, 83, 89, 97];
+        assert_eq!(expected, sieve_primes(limit));
+    }
+
+
+}
+</code>
+</pre>
+
+At any rate, this language is really cool, and I recommend checking out the phenomenal  <a href="https://doc.rust-lang.org/book/">Rust book</a>.
