@@ -3,10 +3,5 @@
 .ghci
 .DS_STORE
 .stack-work/
-_cache
-_site
 .DS_Store
 drafts
-site
-site.o
-site.hi

@@ -1,0 +1,1 @@
+module Site.PublicResources where
