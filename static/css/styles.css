@@ -50,6 +50,10 @@ font-weight: bold;
  grid-area: nv;
 }
 
+.site-head-nav a {
+  font-size: 1.5rem;
+}
+
 .site-head-logo .logo-left {
  display: inline;
 
@@ -298,6 +302,10 @@ lastest-post-section
 #
 * * * * * * * * * * * * * * * * * * * * * */
 
+.content-list {
+  margin-bottom: 48px;
+}
+
 .content-list-item {
   border-bottom: 1px solid rgb(227, 226, 228);
   padding: 0 0 50px 0;
@@ -386,14 +394,14 @@ paginators
 */
 
 .content-list-paginator {
-  margin: 30px 0 80px 0;
+  margin: 30px 0 40px 0;
   text-align: center;
   margin-bottom: 60px;
   float: right;
 }
 
 .paginator {
-  padding: 3px 8px;
+  padding: 3px 6px 3px 10px;
   color:  rgb(178, 174, 180);
   display: inline;
 }

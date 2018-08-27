@@ -72,10 +72,10 @@ siteWideFooter =
     H.p ! A.class_ "footer-copyright" $ "Ekadanta.co Copyright (c) 2018 Erik Aker"
     H.p ! A.class_ "footer-attribution" $ do
       void "Site designed by "
-      H.a ! A.href "" $ "Jonathan Whitmire"
+      H.a ! A.href "https://www.linkedin.com/in/jonwhitmire" ! A.target "_blank" $ "Jon Whitmire"
     H.p ! A.class_ "footer-footenote" $ do
       void "This site is"
-      H.a ! A.href "" $ "open source"
+      H.a ! A.href "https://gitlab.com/erewok/ekadanta-co-servant" ! A.target "_blank" $ "open source"
     H.script $ H.text googAnalytics
     
 

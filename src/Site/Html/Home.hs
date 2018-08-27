@@ -30,8 +30,7 @@ homeAboutSection =
 homeAboutContent :: Html
 homeAboutContent = do
   H.h1 "👋 Hi, I'm Erik."
-  H.p "I'm a former English teacher and freelance writer. Now I work as a software developer in San Diego, California. My
-  areas of expertise are Python, Javascript, ETL, DevOps, cloud infrastructure, and application design."
+  H.p "I'm a former English teacher and freelance writer. Now I work as a software developer in San Diego, California. My areas of expertise are Python, Javascript, ETL, DevOps, cloud infrastructure, and application design."
 
 homeProjectsSection :: [Types.Resource] -> Html
 homeProjectsSection projects = 

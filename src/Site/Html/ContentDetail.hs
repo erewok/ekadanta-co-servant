@@ -27,7 +27,7 @@ makeBreadCrumbs Types.BlogPost = do
   breadCrumber "Blog Post"
 makeBreadCrumbs Types.About = breadCrumber "About"
 makeBreadCrumbs Types.Project = do
-  breadCrumber $ H.a ! A.href "/projects" $ "📖 Blog"
+  breadCrumber $ H.a ! A.href "/projects" $ "📡 Projects"
   breadCrumber ">"
   breadCrumber "Project"
 
