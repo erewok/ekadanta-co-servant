@@ -11,46 +11,49 @@ import qualified Text.Blaze.Html5.Attributes as A
 
 pageSkeleton :: Html -> Html
 pageSkeleton content = 
-    H.docTypeHtml $
-        H.html $ do
-            siteWideHead
-            pageContentWrapper content
+  H.docTypeHtml $
+    H.html $ do
+      siteWideHead
+      pageContentWrapper content
 
 
 pageContentWrapper :: Html -> Html
 pageContentWrapper content = 
-    H.body $ do
-        H.div ! A.class_ "site-wide-wrapper" $ do
-            siteWideContentHead
+  H.body $ do
+    H.div ! A.class_ "site-wide-wrapper" $ do
+      siteWideContentHead
 
-            H.div ! A.class_ "home-main" $
-                content
+      H.div ! A.class_ "home-main" $
+        content
 
-        siteWideFooter
+    siteWideFooter
             
 siteWideNav :: Html
-siteWideNav = H.nav ! A.class_ "site-head-nav" $
+siteWideNav = 
+  H.nav ! A.class_ "site-head-nav" $
     H.ul $ do
-        H.li ! A.class_ "nav-item" $
-            H.a ! A.href "/posts" $ "Blog"
-        H.li ! A.class_ "nav-item" $
-            H.a ! A.href "/projects" $ "Projects"
-        H.li ! A.class_ "nav-item" $
-            H.a ! A.href "/about" $ "About"
-        H.li ! A.class_ "nav-item" $
-            H.a ! A.href "/contact" $ "Contact"
+      H.li ! A.class_ "nav-item" $
+        H.a ! A.href "/posts" $ "Blog"
+      H.li ! A.class_ "nav-item" $
+        H.a ! A.href "/projects" $ "Projects"
+      H.li ! A.class_ "nav-item" $
+        H.a ! A.href "/about" $ "About"
+      H.li ! A.class_ "nav-item" $
+        H.a ! A.href "/contact" $ "Contact"
 
 
 siteWideContentHead :: Html
-siteWideContentHead = H.header ! A.class_ "site-wide-head" $ do
+siteWideContentHead = 
+  H.header ! A.class_ "site-wide-head" $ do
     H.div ! A.class_ "site-head-logo" $ do
-        H.div ! A.class_ "logo-left" $ "ekadanta"
-        H.div ! A.class_ "logo-right" $ ".co"
+      H.div ! A.class_ "logo-left" $ "ekadanta"
+      H.div ! A.class_ "logo-right" $ ".co"
     siteWideNav
 
 
 siteWideHead :: Html
-siteWideHead = H.head $ do
+siteWideHead = 
+  H.head $ do
     H.title "Ekadanta.co / erik aker"
     H.meta ! A.name "viewport" ! A.content "width=device-width, initial-scale=1"
     H.meta ! A.name "Content-Type" ! A.content "text/html; charset=UTF-8"
@@ -64,14 +67,15 @@ siteWideHead = H.head $ do
 
 
 siteWideFooter :: Html
-siteWideFooter = H.footer $ do
+siteWideFooter = 
+  H.footer $ do
     H.p ! A.class_ "footer-copyright" $ "Ekadanta.co Copyright (c) 2018 Erik Aker"
     H.p ! A.class_ "footer-attribution" $ do
-        void "Site designed by "
-        H.a ! A.href "" $ "Jonathan Whitmire"
+      void "Site designed by "
+      H.a ! A.href "" $ "Jonathan Whitmire"
     H.p ! A.class_ "footer-footenote" $ do
-        void "This site is"
-        H.a ! A.href "" $ "open source"
+      void "This site is"
+      H.a ! A.href "" $ "open source"
     H.script $ H.text googAnalytics
     
 

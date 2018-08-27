@@ -19,15 +19,15 @@ instance FromJSON ResourceType
 instance ToJSON ResourceType
 
 data Resource = Resource {
-    _pubdate :: Text
-    , _resourceType :: ResourceType
-    , _featuredImage :: Maybe Text
-    , _body :: Text
-    , _title :: Text
-    , _lede  :: Maybe Text
-    , _tags :: [Text]
-    , _published :: Bool
-    , _pid :: Text
+  _pubdate :: Text
+  , _resourceType :: ResourceType
+  , _featuredImage :: Maybe Text
+  , _published :: Bool
+  , _body :: Text
+  , _title :: Text
+  , _lede  :: Text
+  , _tags :: [Text]
+  , _pid :: Text
 } deriving (Eq, Show, Generic)
 
 instance FromJSON Resource

@@ -5,3 +5,5 @@
 .stack-work/
 .DS_Store
 drafts
+templates/static
+.vscode/

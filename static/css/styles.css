@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css?family=Monoton|Roboto+Slab|Source+Sans+Pro|Playfair+Display');
+@import url('https://fonts.googleapis.com/css?family=Monoton|Roboto+Slab|Source+Sans+Pro:Light|Playfair+Display:black');
 
 /* 
 site-wide stuff 
@@ -18,7 +18,8 @@ body {
   margin: 0 auto;
   margin-bottom: 100px;
   color: rgb(75, 72, 77);
-  font-size: 1em;
+  font-size: 1.3em;
+  font-weight: 100;
   font-family: 'Source Sans Pro', sans-serif;
 }
 
@@ -145,7 +146,7 @@ project cards
 .home-projects {
   display: grid;
   grid-template-columns: repeat(3, 3fr);
-  grid-column-gap: 20px;
+  grid-column-gap: 40px;
   grid-auto-rows: minmax(100px, auto);
   grid-template-areas:
   "project1 project2 project3"
@@ -223,6 +224,12 @@ each project card
   grid-area: project-card-button;
 }
 
+.home-project-button a {
+  font-size: 14px;
+  font-weight: bold;
+  text-transform: capitalize;
+}
+
 .home-project-tags li {
   display: inline;
   background-color: rgb(173, 221, 203);
@@ -250,12 +257,10 @@ lastest-post-section
 .home-latest-post-bg-img {
   min-height: 300px;
   border-radius: 5px;
-  background: url("../../static/images/erik_surf_closeup.jpg");
   -moz-filter: url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\'><filter id=\'grayscale\'><feColorMatrix type=\'matrix\' values=\'0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0 0 0 1 0\'/></filter></svg>#grayscale");
   -o-filter: url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\'><filter id=\'grayscale\'><feColorMatrix type=\'matrix\' values=\'0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0 0 0 1 0\'/></filter></svg>#grayscale");
   -webkit-filter: grayscale(100%);
-  filter: gray;
-  filter: url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\'><filter id=\'grayscale\'><feColorMatrix type=\'matrix\' values=\'0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0 0 0 1 0\'/></filter></svg>#grayscale");
+  filter: grayscale(100%);
 }
 
 .home-latest-post-content-left {
@@ -271,6 +276,7 @@ lastest-post-section
 }
 
 .home-latest-post-content-left h3 {
+  font-family: 'Roboto Slab', serif;
   margin: 10px 0 30px 0;
 }
 
@@ -292,50 +298,50 @@ lastest-post-section
 #
 * * * * * * * * * * * * * * * * * * * * * */
 
-.blog-post-item {
+.content-list-item {
   border-bottom: 1px solid rgb(227, 226, 228);
   padding: 0 0 50px 0;
 }
 
-.blog-post-item:not(:first-child) {
+.content-list-item:not(:first-child) {
   margin-top: 40px;
 }
 
-.blog-post-item:last-child {
+.content-list-item:last-child {
   margin-bottom: 40px;
 }
 
 
-.blog-post-item-featured-img img {
+.content-list-item-featured-img img {
   max-width: 800px;
   max-height: 200px;
   border-radius: 6px;
 }
 
-.blog-post-item-date {
+.content-list-item-date {
   color: rgb(178, 174, 180);
 }
 
-.blog-post-item-lede h3 {
+.content-list-item-lede h3 {
   font-family: 'Roboto Slab', serif;
   text-transform: capitalize;
 }
 
-.blog-post-item-read-more a {
+.content-list-item-read-more a {
   text-decoration: none;
   color: rgb(178, 174, 180);
 }
 
-.blog-post-item-tags {
+.content-list-item-tags {
   padding-top: 20px;
   font-size: 1.45rem;
 }
 
-.blog-post-item-tags ul {
+.content-list-item-tags ul {
   display: inline;
 }
 
-li.blog-post-item-tag {
+li.content-list-item-tag {
   display: inline;
   border: 1px solid rgb(178, 174, 180);
   border-radius: 6px;  
@@ -350,7 +356,7 @@ li.blog-post-item-tag {
 search column 
 */
 
-.blog-search-tags li {
+.content-search-tags li {
   display: inline;
   border: 1px solid  rgb(178, 174, 180);
   border-radius: 6px;  
@@ -361,7 +367,7 @@ search column
   float: left;
 }
 
- .blog-search-tags li.active {
+ .content-search-tags li.active {
   display: inline;
   border-radius: 6px;
   border: 1px solid  rgb(251, 85, 95);
@@ -379,7 +385,7 @@ search column
 paginators 
 */
 
-.blog-list-paginator {
+.content-list-paginator {
   margin: 30px 0 80px 0;
   text-align: center;
   margin-bottom: 60px;
@@ -426,7 +432,7 @@ Above the fold
   margin-right: 10px;
 }
 
-.blog-post-head {
+.content-detail-head {
   font-size: 2rem;
   border-bottom: 1px solid rgb(227, 226, 228);
   margin-top: 50px;
@@ -434,26 +440,26 @@ Above the fold
   width: 100;
 }
 
-.blog-post-date-head {
+.content-detail-date-head {
   display: inline;
   text-transform: uppercase;
   color: rgb(178, 174, 180);
 }
 
-.blog-post-contact-head {
+.content-detail-contact-head {
   float: right;
 }
 
-.blog-post-contact-head .blog-post-contact-links {  
+.content-detail-contact-head .content-detail-contact-links {  
   list-style-type: none;
 }
 
-.blog-post-contact-links li {
+.content-detail-contact-links li {
   display: inline;
   margin-left: 20px;
 }
 
-.blog-post-contact-links {
+.content-detail-contact-links {
   font-size: 3rem;
 }
 
@@ -461,48 +467,48 @@ Above the fold
 Below the fold
  */
 
-.blog-post-featured-img {
+.content-detail-featured-img {
   width: 100%;
   border-radius: 6px;
   margin-top: 20px;
   max-height: 400px;
 }
 
-.blog-post-title {
+.content-detail-title {
   font-family: 'Roboto Slab', serif;
   text-transform: capitalize;
 }
 
-.blog-post-content {
+.content-detail-content {
   margin: 40px 0 80px 0;
   display: grid;
   grid-template-columns: 1fr 3fr 1fr;
   grid-column-gap: 1px;
   grid-row-gap: 30px;
   grid-template-areas:
-  ". blog-post-head-grid ."
-  ". blog-post-content-grid blog-post-contact-grid"
+  ". content-detail-head-grid ."
+  ". content-detail-content-grid content-detail-contact-grid"
 }
 
-.blog-post-body-head {
+.content-detail-body-head {
   display: grid;
-  grid-area: blog-post-head-grid;
+  grid-area: content-detail-head-grid;
 }
 
-.blog-post-body-content {
+.content-detail-body-content {
   display: grid;
-  grid-area: blog-post-content-grid;
+  grid-area: content-detail-content-grid;
 }
-.blog-post-contact {
+.content-detail-contact {
   display: grid;
-  grid-area: blog-post-contact-grid;
+  grid-area: content-detail-contact-grid;
 }
 
-.blog-post-contact ul {
+.content-detail-contact ul {
   list-style-type: none;
 }
 
-.blog-post-body-contact-links li {
+.content-detail-body-contact-links li {
   display: inline;
   margin-left: 12px;
   padding: 8px 10px;
@@ -512,7 +518,7 @@ Below the fold
   box-shadow: 2px 4px 4px rgb(227, 226, 228), -1px 2px 4px rgb(227, 226, 228);
 }
 
-.blog-post-body-contact-links {
+.content-detail-body-contact-links {
   font-size: 2.5rem;
   margin-bottom: 20px;
 }
