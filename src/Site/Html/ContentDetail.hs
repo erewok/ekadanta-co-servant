@@ -1,4 +1,6 @@
-module Site.Html.ContentDetail where
+module Site.Html.ContentDetail (
+  contentDetailPage
+) where
 
 import qualified Data.Text                   as T
 import           RIO

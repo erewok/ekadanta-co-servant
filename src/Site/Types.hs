@@ -10,6 +10,12 @@ import           RIO
 import qualified Text.Blaze.Html5            as H
 
 
+type PageTotal = Int
+type CurrentPage = Int
+type PageNum = (PageTotal, CurrentPage)
+type AllSiteTags = [Text]
+
+
 data ResourceType = BlogPost
                    | About
                    | Project

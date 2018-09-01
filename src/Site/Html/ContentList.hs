@@ -1,29 +1,124 @@
-module Site.Html.ContentList where
+module Site.Html.ContentList (
+  contentListPage
+  , renderPaginator
+) where
 
+import           Control.Lens
 import qualified Data.Text                   as T
-import           RIO
+import           RIO                         hiding ((^.))
+import qualified RIO.HashSet                 as HS
 import           Text.Blaze.Html             ( Html )
 import           Text.Blaze.Html5            ( (!) )
 import qualified Text.Blaze.Html5            as H
 import qualified Text.Blaze.Html5.Attributes as A
 
 import qualified Site.Html.Base              as Base
-import qualified Site.Types                  as Types
-  
+import           Site.Types
 
-contentListPage ::  Types.ResourceType -> [Types.Resource] -> Html
-contentListPage rtype content = Base.pageSkeleton $ contentListPageBuilder rtype content
 
-contentListPageBuilder :: Types.ResourceType -> [Types.Resource] -> Html
-contentListPageBuilder rtype content = do
+contentListPage ::  PageNum -> ResourceType -> AllSiteTags -> [Resource] -> Html
+contentListPage pgNum rtype allTags content = Base.pageSkeleton $ contentListPageBuilder pgNum rtype allTags content
+
+contentListPageBuilder :: PageNum -> ResourceType -> AllSiteTags -> [Resource] -> Html
+contentListPageBuilder pgNum rtype allTags content = do
   makeSectionHead rtype
+  H.div ! A.class_ "row" $ do
+   renderContentList content
+   renderPaginator pgNum
+   renderSearchSection content allTags
 
 
-
-makeSectionHead :: Types.ResourceType -> Html
+makeSectionHead :: ResourceType -> Html
 makeSectionHead rtype = do
   H.h2 ! A.class_ "section-head" $
     case rtype of
-      Types.About -> H.a ! A.href "/about" $ "About"
-      Types.BlogPost -> H.a ! A.href "/posts" $ "📖 Blog"
-      Types.Project -> H.a ! A.href "/projects" $ "📡 Projects"
+      About -> H.a ! A.href "/about" $ "About"
+      BlogPost -> H.a ! A.href "/posts" $ "📖 Blog"
+      Project -> H.a ! A.href "/projects" $ "📡 Projects"
+
+
+-- | Functions for rendering content
+renderContentList :: [Resource] -> Html
+renderContentList content = mconcat $ map renderContentListItem content
+
+renderContentListItem :: Resource -> Html
+renderContentListItem item =
+  H.div ! A.class_ "content-list-item" $ do
+    renderContentListItemFeaturedImg item
+    renderContentListItemLede item
+    renderContentListItemTagList (item ^. tags)
+   
+
+renderContentListItemFeaturedImg :: Resource -> Html
+renderContentListItemFeaturedImg item = 
+  case (item ^. featuredImage) of
+    Nothing -> pure ()
+    Just img -> H.div ! A.class_ "content-list-item-featured-img" $
+      H.img ! A.src (H.toValue img)
+
+renderContentListItemLede :: Resource -> Html
+renderContentListItemLede item = 
+  H.div ! A.class_ "content-list-item-lede" $ do
+    H.span ! A.class_ "content-list-item-date" $ H.toMarkup (item ^. pubdate)
+    H.h3 $ H.toMarkup (item ^. title)
+    H.p $ H.toMarkup (item ^. lede)
+    H.div ! A.class_ "content-list-item-read-more" $
+      H.a ! A.href (H.toValue $ "/projects" <> item ^. pid) $ "Read More..."
+
+
+renderContentListItemTagList :: [Text] -> Html
+renderContentListItemTagList tags =
+  H.div ! A.class_ "content-list-item-tags" $ do
+    H.span $ H.i ! A.class_ "fa fa-tag" $ ""
+    H.ul $ mconcat (map renderContentListItemTag tags)
+
+renderContentListItemTag :: Text -> Html
+renderContentListItemTag tag = H.li ! A.class_ "content-list-item-tag" $ H.toMarkup tag
+
+
+-- | Auxiliary page content: paginator, search column, etc.
+renderPaginator :: PageNum -> Html
+renderPaginator (totalPages, currentPageNum) = 
+  H.div ! A.class_ "content-list-paginator" $ do
+    makeMaybeValidLeftArrow currentPageNum
+    mconcat $ map makePaginatorButton [1..currentPageNum - 1]
+    H.div ! A.class_ "paginator active" $ H.toMarkup currentPageNum
+    mconcat $ map makePaginatorButton [currentPageNum + 1..totalPages]
+    makeMaybeValidRightArrow totalPages currentPageNum
+
+makePaginatorButton :: Int -> Html
+makePaginatorButton num = H.div ! A.class_ "paginator" $ H.toMarkup num
+
+
+makeMaybeValidLeftArrow :: Int -> Html
+makeMaybeValidLeftArrow currentPageNum = 
+  if currentPageNum == 1
+    then H.div ! A.class_ "paginator invalid" $ "<"
+    else H.div ! A.class_ "paginator valid" $ "<"
+
+makeMaybeValidRightArrow :: PageTotal -> CurrentPage -> Html
+makeMaybeValidRightArrow totalPages currentPageNum = 
+  if currentPageNum == totalPages
+    then H.div ! A.class_ "paginator invalid" $ ">"
+    else H.div ! A.class_ "paginator valid" $ ">"
+
+
+renderSearchSection :: [Resource] -> AllSiteTags -> Html
+renderSearchSection content allTags =
+  H.div ! A.class_ "four columns" $ do
+    H.form $
+      H.input ! A.class_ "u-full-width" ! A.placeholder "search ekadanta.co" ! A.type_ "text"
+    H.h3 "Tags"
+    H.ul $ renderSearchTags (mconcat $ map _tags content) allTags
+
+renderSearchTags :: [Text] -> AllSiteTags -> Html
+renderSearchTags currentTags allTags = do
+  let hashTags = HS.fromList(allTags)
+      activeHashTags = HS.fromList(currentTags)
+      inactiveTags = HS.difference hashTags activeHashTags
+      makeActiveTag tg = H.li ! A.class_ "active" $ H.toMarkup tg
+      makeInactiveTag = H.li . H.toMarkup
+
+  mconcat $ map makeActiveTag currentTags
+  mconcat $ map makeInactiveTag (HS.toList inactiveTags)
+  

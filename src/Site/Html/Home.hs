@@ -1,4 +1,6 @@
-module Site.Html.Home where
+module Site.Html.Home (
+  homePage
+) where
 
 import qualified Data.Text                   as T
 import           RIO

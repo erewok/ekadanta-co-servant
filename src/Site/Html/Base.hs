@@ -1,4 +1,6 @@
-module Site.Html.Base where
+module Site.Html.Base (
+  pageSkeleton
+) where
 
 
 import qualified Data.Text                   as T
