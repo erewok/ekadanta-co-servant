@@ -26,6 +26,7 @@ dependencies:
 - bloodhound
 - bytestring
 - envy
+- http-api-data
 - lens
 - servant
 - servant-blaze
@@ -40,6 +41,7 @@ default-extensions:
   - GADTs
   - InstanceSigs
   - LambdaCase
+  - MultiWayIf
   - NoImplicitPrelude
   - OverloadedStrings
   - RecordWildCards

@@ -530,3 +530,18 @@ Below the fold
   font-size: 2.5rem;
   margin-bottom: 20px;
 }
+
+
+/* * * * * * * * * * * * * * * * * * * * * *
+#
+# Admin
+#
+* * * * * * * * * * * * * * * * * * * * * */
+
+/* 
+Admin Edit List Table
+*/
+
+.admin-edit-table {
+  margin-bottom: 80px;
+}

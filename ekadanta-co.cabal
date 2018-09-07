@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 4491f109e8cbb3961130968b68d568e40b68dc8bb6d5e87dd8e5250939ea2d2c
+-- hash: 3d5578f3eabe6a18581019d53ee1ad9343b9b39babcf928ab6880bf061a825a7
 
 name:           ekadanta-co
 version:        0.1.0.0
@@ -41,7 +41,7 @@ library
       Paths_ekadanta_co
   hs-source-dirs:
       src
-  default-extensions: DeriveGeneric GADTs InstanceSigs LambdaCase NoImplicitPrelude OverloadedStrings RecordWildCards ScopedTypeVariables UnicodeSyntax
+  default-extensions: DeriveGeneric GADTs InstanceSigs LambdaCase MultiWayIf NoImplicitPrelude OverloadedStrings RecordWildCards ScopedTypeVariables UnicodeSyntax
   build-depends:
       aeson
     , base >=4.7 && <5
@@ -49,6 +49,7 @@ library
     , bloodhound
     , bytestring
     , envy
+    , http-api-data
     , lens
     , rio
     , servant
@@ -65,7 +66,7 @@ executable ekadanta-co
       Paths_ekadanta_co
   hs-source-dirs:
       app
-  default-extensions: DeriveGeneric GADTs InstanceSigs LambdaCase NoImplicitPrelude OverloadedStrings RecordWildCards ScopedTypeVariables UnicodeSyntax
+  default-extensions: DeriveGeneric GADTs InstanceSigs LambdaCase MultiWayIf NoImplicitPrelude OverloadedStrings RecordWildCards ScopedTypeVariables UnicodeSyntax
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       aeson
@@ -75,6 +76,7 @@ executable ekadanta-co
     , bytestring
     , ekadanta-co
     , envy
+    , http-api-data
     , lens
     , rio
     , servant
@@ -94,7 +96,7 @@ test-suite ekadanta-co-test
       Paths_ekadanta_co
   hs-source-dirs:
       test
-  default-extensions: DeriveGeneric GADTs InstanceSigs LambdaCase NoImplicitPrelude OverloadedStrings RecordWildCards ScopedTypeVariables UnicodeSyntax
+  default-extensions: DeriveGeneric GADTs InstanceSigs LambdaCase MultiWayIf NoImplicitPrelude OverloadedStrings RecordWildCards ScopedTypeVariables UnicodeSyntax
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       aeson
@@ -104,6 +106,7 @@ test-suite ekadanta-co-test
     , bytestring
     , ekadanta-co
     , envy
+    , http-api-data
     , lens
     , rio
     , servant
