@@ -25,15 +25,17 @@ dependencies:
 - blaze-html
 - bloodhound
 - bytestring
+- cmark
 - envy
 - http-api-data
+- http-client
 - lens
 - servant
 - servant-blaze
 - servant-server
 - rio
 - text
-- time
+- uuid
 - wai
 
 default-extensions:

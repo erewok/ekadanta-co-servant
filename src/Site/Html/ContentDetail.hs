@@ -2,6 +2,7 @@ module Site.Html.ContentDetail (
   contentDetailPage
 ) where
 
+import qualified CMark                       as Mark
 import qualified Data.Text                   as T
 import           RIO
 import           Text.Blaze.Html             ( Html )
@@ -57,7 +58,7 @@ renderDetailContent post = do
       H.h3 ! A.class_ "content-detail-title" $ H.toMarkup (post ^. Types.title)
       H.span ! A.class_ "content-detail-lede" $ H.toMarkup (post ^. Types.lede)
 
-    H.div ! A.class_ "content-detail-body-content" $ H.toMarkup (post ^. Types.body)
+    H.div ! A.class_ "content-detail-body-content" $ H.toMarkup (Mark.commonmarkToHtml [] $ post ^. Types.body)
     
     H.div ! A.class_ "content-detail-contact" $
       H.ul ! A.class_ "content-detail-body-contact-links" $ contactLinks

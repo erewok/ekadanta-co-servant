@@ -1,4 +1,7 @@
-module Site.Html.Admin where
+module Site.Html.Admin (
+  adminEditListPage
+  , adminEditDetailPage
+) where
 
 import qualified Data.Text                   as T
 import           RIO
@@ -19,8 +22,6 @@ adminEditDetailPage :: Maybe Resource -> Html
 adminEditDetailPage item = Base.pageSkeleton $ contentEditDetail item
 
 
-
-
 -- | Content Edit List: Show all Resources for editing
 contentEditList :: PageNum -> [Resource] -> Html
 contentEditList pgNum content = do
@@ -38,7 +39,7 @@ renderTableHead =
       H.tr $ do
         H.td "Id"
         H.td "Type"
-        H.td "Content"
+        H.td "Encoding"
         H.td "Published"
         H.td "Publish Date"
         H.td "Title"
@@ -78,7 +79,72 @@ contentEditDetail (Just item) = updateContentItem item
 
 -- | Edit Detail helpers
 newContentItemForm :: Html
-newContentItemForm = undefined
+newContentItemForm = do
+  H.div ! A.class_ "edit-head" $
+    H.h1 "New Content Item"
+
+  H.form ! A.method "post" ! A.action "/admin/item" $ do
+    H.div ! A.class_ "row" $ do
+      H.div ! A.class_ "two columns" $ do
+        H.label ! A.for "pid" $ "Post ID"
+        H.input ! A.type_ "text" ! A.id "pid" ! A.name "_pid" ! A.readonly "true"
+      
+      H.div ! A.class_ "two columns" $
+        H.label ! A.for "published" $ do
+          "Post ID"
+          H.input ! A.type_ "checkbox" ! A.id "published" ! A.name "_published"
+          H.span ! A.class_ "label-body" $ "Publish?"
+
+      H.div ! A.class_ "two columns" $ do
+        H.label ! A.for "resourceType" $ "Resource Type"
+        H.select ! A.class_ "u-fill-width" ! A.class_ "resourceType" $ do
+          H.select ! A.class_ "u-full-width" ! A.id "resourceType" ! A.name "_resourceType" $ do
+            H.option ! A.value "blogpost" $ "BlogPost"
+            H.option ! A.value "project" $ "Project"
+            H.option ! A.value "about" $ "About"
+
+      H.div ! A.class_ "two columns" $ do
+        H.label ! A.for "contentEncoding" $ "Resource Type"
+        H.select ! A.class_ "u-fill-width" ! A.class_ "contentEncoding" $ do
+          H.select ! A.class_ "u-full-width" 
+            ! A.id "contentEncoding" ! A.name "_contentEncoding" $ do
+              H.option ! A.value "html" $ "Html"
+              H.option ! A.value "markdown" $ "Markdown"
+
+      H.div ! A.class_ "two columns" $ do
+        H.label ! A.for "pubdate" $ "Publication Date"
+        H.input ! A.type_ "text" 
+          ! A.id "pubdate" ! A.name "_pubdate"
+
+    H.label ! A.for "featuredImage" $ "Featured Image"
+    H.input ! A.type_ "text" 
+      ! A.id "featuredImage" ! A.name "_featuredImage" 
+      ! A.placeholder "Featured Image URL" ! A.class_ "u-full-width"
+
+    H.label ! A.for "title" $ "Title"
+    H.input ! A.type_ "text" 
+      ! A.id "title" ! A.name "_title" 
+      ! A.placeholder "Sample post title" ! A.class_ "u-full-width" 
+
+    H.label ! A.for "lede" $ "Lede"
+    H.textarea 
+      ! A.id "lede" ! A.name "_lede" 
+      ! A.placeholder "Lede" ! A.class_ "u-full-width" 
+      $ ""
+
+    H.label ! A.for "body" $ "Body"
+    H.textarea 
+      ! A.id "body" ! A.name "_body" 
+      ! A.placeholder "body" ! A.class_ "u-full-width"
+      $ ""
+      
+    H.label ! A.for "tags" $ "Tags"
+    H.input ! A.type_ "text" ! A.id "tags" 
+      ! A.name "_tags" ! A.placeholder "Haskell, Rust, etc." 
+      ! A.class_ "u-full-width" 
+
+
+    H.input ! A.class_ "button-primary" ! A.type_ "submit" !  A.value "Send"
 
 
 updateContentItem :: Resource -> Html
@@ -86,7 +152,7 @@ updateContentItem item = do
   H.div ! A.class_ "edit-head" $
     H.h1 $ (H.toMarkup $ item ^. pid) <> (H.toMarkup . show $ item ^. resourceType)
 
-  H.form ! A.method "post" ! A.action "/admin/item" $
+  H.form ! A.method "post" ! A.action "/admin/item" $ do
     H.div ! A.class_ "row" $ do
       H.div ! A.class_ "two columns" $ do
         H.label ! A.for "pid" $ "Post ID"
@@ -98,28 +164,58 @@ updateContentItem item = do
           H.input ! A.type_ "checkbox" ! A.id "published" ! A.name "_published" ! A.value (H.toValue $ item ^. published)
           H.span ! A.class_ "label-body" $ "Publish?"
 
-      H.div ! A.class_ "four columns" $ do
+      H.div ! A.class_ "two columns" $ do
         H.label ! A.for "resourceType" $ "Resource Type"
         H.select ! A.class_ "u-fill-width" ! A.class_ "resourceType" $ do
           H.select ! A.class_ "u-full-width" ! A.id "resourceType" ! A.name "_resourceType" ! A.value (H.toValue . show $ item ^. resourceType) $ do
-            H.option ! A.value "BlogPost" $ "BlogPost"
-            H.option ! A.value "BlogPost" $ "Project"
-            H.option ! A.value "BlogPost" $ "About"
+            H.option ! A.value "blogpost" $ "BlogPost"
+            H.option ! A.value "project" $ "Project"
+            H.option ! A.value "about" $ "About"
 
-      H.div ! A.class_ "four columns" $ do
+      H.div ! A.class_ "two columns" $ do
+        H.label ! A.for "contentEncoding" $ "Resource Type"
+        H.select ! A.class_ "u-fill-width" ! A.class_ "contentEncoding" $ do
+          H.select ! A.class_ "u-full-width" 
+            ! A.id "contentEncoding" ! A.name "_contentEncoding" 
+            ! A.value (H.toValue . show $ item ^. contentEncoding) $ do
+              H.option ! A.value "html" $ "Html"
+              H.option ! A.value "markdown" $ "Markdown"
+
+      H.div ! A.class_ "two columns" $ do
         H.label ! A.for "pubdate" $ "Publication Date"
-        H.input ! A.type_ "text" ! A.id "pubdate" ! A.name "_pubdate" ! A.value (H.toValue $ item ^. pubdate)
-      
+        H.input ! A.type_ "text" 
+          ! A.id "pubdate" ! A.name "_pubdate" 
+          ! A.value (H.toValue $ item ^. pubdate)
+
+    H.label ! A.for "featuredImage" $ "Featured Image"
+    H.input ! A.type_ "text" 
+      ! A.id "featuredImage" ! A.name "_featuredImage" 
+      ! A.placeholder "Featured Image URL" ! A.class_ "u-full-width" 
+      ! A.value (H.toValue $ maybe "" id (item ^. featuredImage))
+
+    H.label ! A.for "title" $ "Title"
+    H.input ! A.type_ "text" 
+      ! A.id "title" ! A.name "_title" 
+      ! A.placeholder "Sample post title" ! A.class_ "u-full-width" 
+      ! A.value (H.toValue $ item ^. title)
+
+    H.label ! A.for "lede" $ "Lede"
+    H.textarea 
+      ! A.id "lede" ! A.name "_lede" 
+      ! A.placeholder "Lede" ! A.class_ "u-full-width" $ 
+        H.toMarkup $ item ^. lede
+
+    H.label ! A.for "body" $ "Body"
+    H.textarea 
+      ! A.id "body" ! A.name "_body" 
+      ! A.placeholder "body" ! A.class_ "u-full-width" $ 
+        H.toMarkup $ item ^. body
+
+    H.label ! A.for "tags" $ "Tags"
+    H.input ! A.type_ "text" ! A.id "tags" 
+      ! A.name "_tags" ! A.placeholder "Haskell, Rust, etc." 
+      ! A.class_ "u-full-width" 
+      ! A.value (H.toValue . T.intercalate ", " $ item ^. tags)
 
 
-  -- H.section ! A.id "contact" ! A.class_ "container contact-us u-full-width u-max-full-width" $
-
-  --   H.div ! A.class_ "eight columns edit-content-form" $
-  --     H.form ! A.method "post" ! A.action "/admin/item" $ do
-  --       -- _featuredImage
-  --       -- _published
-  --       H.input ! A.class_ "u-full-width" ! A.type_ "text" ! A.name "_title" ! A.id "titleInput" $ H.toMarkup $ item ^. title
-  --       H.input ! A.class_ "u-full-width" ! A.type_ "text" ! A.name "_pubdate" ! A.id "pudateInput" $ H.toMarkup $ item ^. pubdate
-  --       H.input ! A.class_ "u-full-width" ! A.type_ "text" !  A.name "_resourceType" ! A.placeholder "Email" ! A.id "resourceTypeInput"
-  --       H.textarea ! A.class_ "u-full-width" ! A.name "_body" ! A.id "body" $ H.toMarkup $ item ^. body
-  --       H.input ! A.class_ "button u-pull-right" ! A.type_ "submit" !  A.value "Send"
+    H.input ! A.class_ "button-primary" ! A.type_ "submit" !  A.value "Send"

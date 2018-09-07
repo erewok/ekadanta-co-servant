@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 3d5578f3eabe6a18581019d53ee1ad9343b9b39babcf928ab6880bf061a825a7
+-- hash: a6ff982b736388a17c71f677e0775984dea96de63d735a301d6ed76037d1a5e5
 
 name:           ekadanta-co
 version:        0.1.0.0
@@ -28,6 +28,7 @@ library
   exposed-modules:
       Site
       Site.AdminResources
+      Site.Config
       Site.Html.Admin
       Site.Html.Base
       Site.Html.Contact
@@ -48,15 +49,17 @@ library
     , blaze-html
     , bloodhound
     , bytestring
+    , cmark
     , envy
     , http-api-data
+    , http-client
     , lens
     , rio
     , servant
     , servant-blaze
     , servant-server
     , text
-    , time
+    , uuid
     , wai
   default-language: Haskell2010
 
@@ -74,16 +77,18 @@ executable ekadanta-co
     , blaze-html
     , bloodhound
     , bytestring
+    , cmark
     , ekadanta-co
     , envy
     , http-api-data
+    , http-client
     , lens
     , rio
     , servant
     , servant-blaze
     , servant-server
     , text
-    , time
+    , uuid
     , wai
     , wai-extra
     , warp
@@ -104,15 +109,17 @@ test-suite ekadanta-co-test
     , blaze-html
     , bloodhound
     , bytestring
+    , cmark
     , ekadanta-co
     , envy
     , http-api-data
+    , http-client
     , lens
     , rio
     , servant
     , servant-blaze
     , servant-server
     , text
-    , time
+    , uuid
     , wai
   default-language: Haskell2010

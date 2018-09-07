@@ -5,8 +5,6 @@ module Site.Types where
 import           Control.Lens
 import           Data.Aeson
 import qualified Data.Text                         as T
-import           Data.Time.LocalTime
-import           GHC.Exts                          (IsList (..))
 import           GHC.Generics
 import           RIO
 import qualified Text.Blaze.Html5                   as H
