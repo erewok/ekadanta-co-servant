@@ -1,6 +1,5 @@
 module Site.Config where
 
-import           Database.V5.Bloodhound
 import Data.Text
 import GHC.Generics
 import RIO
@@ -36,6 +35,3 @@ instance DefConfig SiteConfig where
   defConfig = SiteConfig Prod "test-version" "http://localhost" "9200"
 
 instance FromEnv SiteConfig
-
-esServer :: SiteConfig -> Server
-esServer config = Server $ esHost config <> ":" <> esPort config

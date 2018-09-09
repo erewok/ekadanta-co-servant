@@ -23,7 +23,6 @@ dependencies:
 - base >= 4.7 && < 5
 - aeson
 - blaze-html
-- bloodhound
 - bytestring
 - cmark
 - envy
@@ -32,13 +31,16 @@ dependencies:
 - lens
 - servant
 - servant-blaze
+- servant-client
 - servant-server
 - rio
 - text
+- time
 - uuid
 - wai
 
 default-extensions:
+  - DataKinds
   - DeriveGeneric
   - GADTs
   - InstanceSigs
@@ -48,7 +50,11 @@ default-extensions:
   - OverloadedStrings
   - RecordWildCards
   - ScopedTypeVariables
+  - TypeOperators
   - UnicodeSyntax
+
+data-files:
+  - data_files/es_ekadanta_content_mapping.json
 
 library:
   source-dirs: src

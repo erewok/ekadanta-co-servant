@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: a6ff982b736388a17c71f677e0775984dea96de63d735a301d6ed76037d1a5e5
+-- hash: a859d8961101f79fe416e42a221d8f7a094f222804c4f3fc04d2973aba0c720a
 
 name:           ekadanta-co
 version:        0.1.0.0
@@ -19,6 +19,8 @@ cabal-version:  >= 1.10
 extra-source-files:
     ChangeLog.md
     README.md
+data-files:
+    data_files/es_ekadanta_content_mapping.json
 
 source-repository head
   type: git
@@ -42,12 +44,11 @@ library
       Paths_ekadanta_co
   hs-source-dirs:
       src
-  default-extensions: DeriveGeneric GADTs InstanceSigs LambdaCase MultiWayIf NoImplicitPrelude OverloadedStrings RecordWildCards ScopedTypeVariables UnicodeSyntax
+  default-extensions: DataKinds DeriveGeneric GADTs InstanceSigs LambdaCase MultiWayIf NoImplicitPrelude OverloadedStrings RecordWildCards ScopedTypeVariables TypeOperators UnicodeSyntax
   build-depends:
       aeson
     , base >=4.7 && <5
     , blaze-html
-    , bloodhound
     , bytestring
     , cmark
     , envy
@@ -57,8 +58,10 @@ library
     , rio
     , servant
     , servant-blaze
+    , servant-client
     , servant-server
     , text
+    , time
     , uuid
     , wai
   default-language: Haskell2010
@@ -69,13 +72,12 @@ executable ekadanta-co
       Paths_ekadanta_co
   hs-source-dirs:
       app
-  default-extensions: DeriveGeneric GADTs InstanceSigs LambdaCase MultiWayIf NoImplicitPrelude OverloadedStrings RecordWildCards ScopedTypeVariables UnicodeSyntax
+  default-extensions: DataKinds DeriveGeneric GADTs InstanceSigs LambdaCase MultiWayIf NoImplicitPrelude OverloadedStrings RecordWildCards ScopedTypeVariables TypeOperators UnicodeSyntax
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       aeson
     , base >=4.7 && <5
     , blaze-html
-    , bloodhound
     , bytestring
     , cmark
     , ekadanta-co
@@ -86,8 +88,10 @@ executable ekadanta-co
     , rio
     , servant
     , servant-blaze
+    , servant-client
     , servant-server
     , text
+    , time
     , uuid
     , wai
     , wai-extra
@@ -101,13 +105,12 @@ test-suite ekadanta-co-test
       Paths_ekadanta_co
   hs-source-dirs:
       test
-  default-extensions: DeriveGeneric GADTs InstanceSigs LambdaCase MultiWayIf NoImplicitPrelude OverloadedStrings RecordWildCards ScopedTypeVariables UnicodeSyntax
+  default-extensions: DataKinds DeriveGeneric GADTs InstanceSigs LambdaCase MultiWayIf NoImplicitPrelude OverloadedStrings RecordWildCards ScopedTypeVariables TypeOperators UnicodeSyntax
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       aeson
     , base >=4.7 && <5
     , blaze-html
-    , bloodhound
     , bytestring
     , cmark
     , ekadanta-co
@@ -118,8 +121,10 @@ test-suite ekadanta-co-test
     , rio
     , servant
     , servant-blaze
+    , servant-client
     , servant-server
     , text
+    , time
     , uuid
     , wai
   default-language: Haskell2010

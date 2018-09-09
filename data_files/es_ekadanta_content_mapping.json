@@ -1,0 +1,43 @@
+{
+    "settings": {
+        "number_of_shards": 3,
+        "number_of_replicas": 2
+    },
+    "mappings": {
+        "content": {
+            "properties": {
+                "_resourceType": {
+                    "type": "keyword"
+                },
+                "_contentEncoding": {
+                    "type": "keyword"
+                },
+                "_featuredImage": {
+                    "type": "text"
+                },
+                "_published": {
+                    "type": "boolean"
+                },
+                "_body": {
+                    "type": "text"
+                },
+                "_title": {
+                    "type": "text"
+                },
+                "_lede": {
+                    "type": "text"
+                },
+                "_tags": {
+                    "type": "keyword"
+                },
+                "_pubdate": {
+                    "type": "date",
+                    "format": "strict_date_optional_time||epoch_millis"
+                },
+                "_pid": {
+                    "enabled": false
+                }
+            }
+        }
+    }
+}
