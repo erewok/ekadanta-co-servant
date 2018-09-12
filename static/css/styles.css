@@ -531,6 +531,19 @@ Below the fold
   margin-bottom: 20px;
 }
 
+/* * * * * * * * * * * * * * * * * * * * * *
+#
+# Contact Page
+#
+* * * * * * * * * * * * * * * * * * * * * */
+.contact-content {
+  margin-top: 25px;
+  padding: 25px 0; 
+}
+.contact-header {
+  text-transform: capitalize;
+  font-family: 'Roboto Slab', serif;
+}
 
 /* * * * * * * * * * * * * * * * * * * * * *
 #
@@ -545,3 +558,4 @@ Admin Edit List Table
 .admin-edit-table {
   margin-bottom: 80px;
 }
+

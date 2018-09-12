@@ -7,7 +7,8 @@
     <title>Ekadanta.co / Erik Aker</title>
     <link rel="icon" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto" />
     <link rel="icon" type="text/css" href="/static/images/favicon.ico" />
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
     <link rel="stylesheet" type="text/css" href="static/css/normalize.css" />
     <link rel="stylesheet" type="text/css" href="static/css/skeleton.css" />
     <link rel="stylesheet" type="text/css" href="static/highlight/styles/default.css" />
@@ -46,61 +47,20 @@
         <div class="home-main">
             <!-- Generic to all pages above -->
 
-            <div class="edit-head">
-                <h1>RESOURCE_ID: RESOURCE-TYPE</h1>
-            </div>
+            <span class="breadcrumbs">📩 Contact</span>
 
-            <form>
-                <div class="row" method="post" action="/admin/item">
-                    <div class="two columns">
-                        <label for="pid">Post ID</label>
-                        <input type="text" name="_pid" readonly>
-                    </div>
-                    <div class="two columns">
-                        <label class="isPublishedLabel">
-                            <input type="checkbox" name="_pubished">
-                            <span class="label-body">Publish?</span>
-                        </label>
-                    </div>
-                    <div class="four columns">
-                        <label for="_resourceType">Resource Type</label>
-                        <select class="u-full-width" id="resourceType" name="_resourceType" value="BlogPost">
-                            <option value="Option 1">BlogPost</option>
-                            <option value="Option 2">Project</option>
-                            <option value="Option 3">About</option>
-                        </select>
-                    </div>
-                    <div class="four columns">
-                        <label for="pubDate">Publish Date</label>
-                        <input class="u-full-width" placeholder="2018/01/01" id="pubDate" name="_pubDate" type="date">
-                    </div>                   
-                    
+            <div class="row contact-content">
+
+                <div class="six columns">
+                    <h2 class="contact-header">Find Me</h2>
                 </div>
 
+                <div class="six columns">
+                    <h2 class="contact-header">Get in Touch</h2>
+                </div>
+    
 
-                <label for="featuredImage">Featured Image</label>
-                <input type="text" class="u-full-width" placeholder="Featured Image URL" id="featuredImage" name="_featuredImage">
-
-
-                <label for="title">Title</label>
-                <input type="text" class="u-full-width" placeholder="Sample post title" id="title" name="_title">
-
-                <label for="lede">Lede</label>
-                <textarea class="u-full-width" placeholder="This is a post lede (keep it short)..." id="lede" name="_lede"></textarea>
-
-                <label for="body">Body</label>
-                <textarea class="u-full-width" placeholder="This is a post about..." id="body" name="_body"></textarea>
-                
-                <label for="tags">Tags (Separate with commas)</label>
-                <input type="text" class="u-full-width" placeholder="Haskell, Rust, Natural Language Processing" id="tags" name="_tags">
-
-
-
-                <input class="button-primary" value="Submit" type="submit">
-            </form>
-            
-
-            
+            </div>
             <!-- Generic to all pages below -->
         </div>
     </div>

@@ -143,7 +143,6 @@ newContentItemForm = do
       ! A.name "_tags" ! A.placeholder "Haskell, Rust, etc." 
       ! A.class_ "u-full-width" 
 
-
     H.input ! A.class_ "button-primary" ! A.type_ "submit" !  A.value "Send"
 
 
@@ -216,6 +215,5 @@ updateContentItem item = do
       ! A.name "_tags" ! A.placeholder "Haskell, Rust, etc." 
       ! A.class_ "u-full-width" 
       ! A.value (H.toValue . T.intercalate ", " $ item ^. tags)
-
 
     H.input ! A.class_ "button-primary" ! A.type_ "submit" !  A.value "Send"

@@ -1,10 +1,24 @@
+{-# LANGUAGE TemplateHaskell #-}
+
 module Site.Config where
 
-import Data.Text
-import GHC.Generics
-import RIO
-import System.Envy
+import           Control.Lens
+import           Data.Text
+import           GHC.Generics
+import           RIO
+import           System.Envy
+import           System.Log.FastLogger      ( LoggerSet
+                                            , flushLogStr
+                                            , pushLogStr
+                                            , toLogStr
+                                            )
 
+type EkadantaApp = RIO EkadantaCtx
+
+data EkadantaCtx = EkadantaCtx {
+  _getConfig   :: SiteConfig
+  , _getKigger :: LoggerSet
+  }
 
 data Environment = Local
                  | Dev
@@ -25,13 +39,17 @@ instance Var Environment where
 
 
 data SiteConfig = SiteConfig {
-  environment :: Environment
-  , version   :: Text
-  , esHost    :: Text
-  , esPort    :: Text
+  environment     :: !Environment
+  , version       :: !Text
+  , esHost        :: !Text
+  , esPort        :: !Text
+  , emailUsername :: !Text
+  , emailPasswd   :: !Text
 } deriving (Generic, Show)
 
 instance DefConfig SiteConfig where
-  defConfig = SiteConfig Prod "test-version" "http://localhost" "9200"
+  defConfig = SiteConfig Prod "test-version" "http://localhost" "9200" "user" "password"
 
 instance FromEnv SiteConfig
+
+makeLenses ''EkadantaCtx

@@ -2,7 +2,7 @@
 
 module Site.Types where
 
-import           Control.Lens
+import           Control.Lens               hiding ( (.=) )
 import           Data.Aeson
 import qualified Data.Text                         as T
 import           Data.Time.Clock                   ( UTCTime )
@@ -18,7 +18,6 @@ import           Web.Internal.HttpApiData          (FromHttpApiData(..)
 import           Web.Internal.FormUrlEncoded       (parseUnique)
 
 
-
 type PageTotal = Int
 type CurrentPage = Int
 type PageNum = (PageTotal, CurrentPage)
@@ -26,25 +25,60 @@ type AllSiteTags = [Text]
 
 -- | Generic Resource object used across whole site
 data Resource = Resource {
-  _pubdate :: Text
-  , _resourceType :: ResourceType
-  , _contentEncoding :: ContentEncoding
+  _pubdate :: !Text
+  , _resourceType :: !ResourceType
+  , _contentEncoding :: !ContentEncoding
   , _featuredImage :: Maybe Text
-  , _published :: Bool
-  , _body :: Text
-  , _title :: Text
-  , _lede  :: Text
+  , _published :: !Bool
+  , _body :: !Text
+  , _title :: !Text
+  , _lede  :: !Text
   , _tags :: [Text]
-  , _pid :: Text
+  , _pid :: !Text
 } deriving (Eq, Show, Generic)
 
-instance FromJSON Resource
-instance ToJSON Resource
+defaultResource = Resource {
+  _pubdate = "0/0/0"
+  , _resourceType = BlogPost
+  , _contentEncoding = ContentMarkdown
+  , _featuredImage = Nothing
+  , _published = False
+  , _body = ""
+  , _title = ""
+  , _lede = ""
+  , _tags = []
+  , _pid = ""
+  }
+
 instance FromForm Resource
 
+instance FromJSON Resource where
+  parseJSON = withObject "resource" $ \o -> Resource
+    <$> o .: "_pubdate"
+    <*> o .: "_resourceType"
+    <*> o .: "_contentEncoding"
+    <*> o .:? "_featuredImage"
+    <*> o .: "_published"
+    <*> o .: "_body"
+    <*> o .: "_title"
+    <*> o .: "_lede"
+    <*> o .: "_tags"
+    <*> o .: "_pid"
+
+instance ToJSON Resource where
+  toJSON res = object [
+    "_pubdate" .= _pubdate res
+    , "_resourceType" .= (toJSON $ _resourceType res)
+    , "_contentEncoding" .= (toJSON $ _contentEncoding res)
+    , "_featuredImage" .= (toJSON $ _featuredImage res)
+    , "_published" .= _published res
+    , "_body" .= _body res
+    , "_title" .= _title res
+    , "_lede" .= _lede res
+    , "_tags" .= (toJSON (_tags res :: [Text]))
+    , "_pid" .= _pid res ]
 
 -- | Resource Types used on the site: to be stored generically in JSON store (Elasticsearch)
-
 data ResourceType = BlogPost
                    | About
                    | Project

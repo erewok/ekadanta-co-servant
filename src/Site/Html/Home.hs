@@ -1,5 +1,6 @@
 module Site.Html.Home (
   homePage
+  , redirectPage
 ) where
 
 import qualified Data.Text                   as T
@@ -86,3 +87,16 @@ latestFeaturedImg post = case post ^. Types.featuredImage of
   Nothing -> A.style "" 
   Just featuredImg ->
     A.style $ H.toValue $ "background: url('"<> featuredImg <> "');"
+
+
+redirectPage :: String -> H.Html
+redirectPage uri = 
+  Base.pageSkeleton $ do
+    H.head $ do
+      H.title "redirecting..."
+      H.meta ! A.httpEquiv "refresh" ! A.content (H.toValue $ "1; url=" ++ uri)
+    H.body $ do
+      H.p "You are being redirected."
+      H.p $ do
+        void "If your browser does not refresh the page click "
+        H.a ! A.href (H.toValue uri) $ "here"

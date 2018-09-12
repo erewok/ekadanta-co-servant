@@ -1,6 +1,8 @@
 module Site.Search where
 
+import           Control.Lens
 import           Data.Aeson
+import           Data.Aeson.Lens
 import qualified Data.Text                               as T
 import qualified Data.UUID                               as UUID
 import qualified Data.UUID.V4                            as UUID4
@@ -9,9 +11,51 @@ import           RIO
 import qualified RIO.HashMap                             as HM
 import           Servant.API
 import           Servant.Client
+import           Servant.Server
 
 import           Site.Config
 import           Site.Types
+
+
+-- | Higher-level useful search functions 
+getResourceHits :: SiteConfig -> Value -> IO (Either Text [Resource])
+getResourceHits config query = do
+  resourcesResp <- searchContent config query
+  case resourcesResp of
+    Left err -> pure . Left $ "Failed looking up content"
+    Right value -> case pullHitsResourceTypes value of
+      Nothing -> pure . Left $ "Missing data"
+      Just resources -> pure . Right $ resources
+
+pullHitsResourceTypes :: Value -> Maybe [Resource]
+pullHitsResourceTypes value = 
+  let
+    hmaps = value 
+      ^? _Object 
+      . ix "hits" 
+      . ix "hits"
+      . _Array 
+      ^.. folded 
+      . traverse 
+      . _Object 
+      & map (HM.lookup "_source")
+    justVals = hmaps
+      ^.. traverse 
+      . _Just
+  in traverse decoderRing justVals
+  where decoderRing val = (decode $ encode val) :: Maybe Resource
+
+pullAggsKey :: Text -> Value -> Maybe (Vector Value)
+pullAggsKey key esResult = 
+  esResult 
+    ^? _Object 
+    . ix "aggregations" 
+    . _Object 
+    . ix key 
+    . _Object 
+    . ix "buckets" 
+    . _Array
+
 
 -- | Common queries
 searchLasthreeProjectsQ :: Value
@@ -53,12 +97,40 @@ searchRecentResourcesQ rt n = Object $ HM.fromList [
   , ( "query", resourceTypeTerm rt )
   , ( "sort", pubDateDescSort ) ]
 
+
+_DEFAULT_PAGE_COUNT :: Int
+_DEFAULT_PAGE_COUNT = 25
+
+type PageCount = Maybe Int
+type Offset = Int
+
+searchPaginatingQ :: ResourceType -> PageCount -> Offset -> Value
+searchPaginatingQ rt Nothing offset = Object $ HM.fromList [
+  ( "from", toJSON offset )
+  , ( "size", toJSON _DEFAULT_PAGE_COUNT )
+  , ( "query", resourceTypeTerm rt )
+  , ( "sort", pubDateDescSort ) 
+  , ("aggs", Object $ HM.fromList [ ("tags", tagsAgg), ("counts", docTypeCount) ] )
+  ]
+searchPaginatingQ rt (Just count) offset = Object $ HM.fromList [
+  ( "from", toJSON offset )
+  , ( "size", toJSON count )
+  , ( "query", resourceTypeTerm rt )
+  , ( "sort", pubDateDescSort ) 
+  , ("aggs", Object $ HM.fromList [ ("tags", tagsAgg), ("counts", docTypeCount) ] )
+  ]
+
 resourceTypeTerm :: ResourceType -> Value
 resourceTypeTerm rt = Object $ HM.fromList [ ( "term", Object $ HM.fromList [( "_resourceType", String . T.pack . show $ rt )] )]
 
 pubDateDescSort :: Value
 pubDateDescSort = Object $ HM.fromList [ ( "_pubdate", Object $ HM.fromList [( "order", String "desc")])]
 
+tagsAgg :: Value
+tagsAgg = Object $ HM.fromList [ ( "terms", Object $ HM.fromList [( "field", String "_tags"), ("size", Number 1000 )] )]
+
+docTypeCount :: Value
+docTypeCount = Object $ HM.fromList [ ( "terms", Object $ HM.fromList [( "field", String "_resourceType" ), ("size", Number 5) ] )]
 
 -- | Client functions for interacting with our index/documents
 indexContent :: SiteConfig -> ResourceType -> IO (Either ServantError Value)

@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: a859d8961101f79fe416e42a221d8f7a094f222804c4f3fc04d2973aba0c720a
+-- hash: 5f341155dbb784db52699dcd55f58cb56f6fc5bf71dfe3fc8ab020b93c07d798
 
 name:           ekadanta-co
 version:        0.1.0.0
@@ -52,14 +52,18 @@ library
     , bytestring
     , cmark
     , envy
+    , fast-logger
     , http-api-data
     , http-client
     , lens
+    , lens-aeson
+    , mime-mail
     , rio
     , servant
     , servant-blaze
     , servant-client
     , servant-server
+    , smtps-gmail
     , text
     , time
     , uuid
@@ -82,14 +86,18 @@ executable ekadanta-co
     , cmark
     , ekadanta-co
     , envy
+    , fast-logger
     , http-api-data
     , http-client
     , lens
+    , lens-aeson
+    , mime-mail
     , rio
     , servant
     , servant-blaze
     , servant-client
     , servant-server
+    , smtps-gmail
     , text
     , time
     , uuid
@@ -115,14 +123,18 @@ test-suite ekadanta-co-test
     , cmark
     , ekadanta-co
     , envy
+    , fast-logger
     , http-api-data
     , http-client
     , lens
+    , lens-aeson
+    , mime-mail
     , rio
     , servant
     , servant-blaze
     , servant-client
     , servant-server
+    , smtps-gmail
     , text
     , time
     , uuid

@@ -17,7 +17,8 @@ import           Site.Types
 
 
 contentListPage ::  PageNum -> ResourceType -> AllSiteTags -> [Resource] -> Html
-contentListPage pgNum rtype allTags content = Base.pageSkeleton $ contentListPageBuilder pgNum rtype allTags content
+contentListPage pgNum rtype allTags content = 
+  Base.pageSkeleton $ contentListPageBuilder pgNum rtype allTags content
 
 contentListPageBuilder :: PageNum -> ResourceType -> AllSiteTags -> [Resource] -> Html
 contentListPageBuilder pgNum rtype allTags content = do
@@ -113,8 +114,8 @@ renderSearchSection content allTags =
 
 renderSearchTags :: [Text] -> AllSiteTags -> Html
 renderSearchTags currentTags allTags = do
-  let hashTags = HS.fromList(allTags)
-      activeHashTags = HS.fromList(currentTags)
+  let hashTags = HS.fromList allTags
+      activeHashTags = HS.fromList currentTags
       inactiveTags = HS.difference hashTags activeHashTags
       makeActiveTag tg = H.li ! A.class_ "active" $ H.toMarkup tg
       makeInactiveTag = H.li . H.toMarkup
