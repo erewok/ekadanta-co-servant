@@ -3,12 +3,16 @@ module Site.Search where
 import           Control.Lens
 import           Data.Aeson
 import           Data.Aeson.Lens
-import qualified Data.Text                               as T
-import qualified Data.UUID                               as UUID
-import qualified Data.UUID.V4                            as UUID4
-import           Network.HTTP.Client                     hiding (Proxy)
+import           Data.Aeson.Types         ( parseMaybe, Result(..) )
+import           Data.Maybe               ( catMaybes )
+import qualified Data.Text                as T
+import qualified Data.UUID                as UUID
+import qualified Data.UUID.V4             as UUID4
+import           Network.HTTP.Client      hiding (Proxy)
 import           RIO
-import qualified RIO.HashMap                             as HM
+import qualified RIO.HashMap              as HM
+import qualified RIO.List                 as L
+import qualified RIO.Vector               as V
 import           Servant.API
 import           Servant.Client
 import           Servant.Server
@@ -23,38 +27,45 @@ getResourceHits config query = do
   resourcesResp <- searchContent config query
   case resourcesResp of
     Left err -> pure . Left $ "Failed looking up content"
-    Right value -> case pullHitsResourceTypes value of
-      Nothing -> pure . Left $ "Missing data"
-      Just resources -> pure . Right $ resources
+    Right value -> pure . Right $ pullHitsResources value
 
-pullHitsResourceTypes :: Value -> Maybe [Resource]
-pullHitsResourceTypes value = 
+pullHitsResources :: Value -> [Resource]
+pullHitsResources value = 
   let
-    hmaps = value 
+    sources = value 
       ^? _Object 
       . ix "hits" 
       . ix "hits"
       . _Array 
       ^.. folded 
       . traverse 
-      . _Object 
-      & map (HM.lookup "_source")
-    justVals = hmaps
-      ^.. traverse 
-      . _Just
-  in traverse decoderRing justVals
-  where decoderRing val = (decode $ encode val) :: Maybe Resource
+      . (_Object . ix "_source")
+  in catMaybes $ map decoderRing sources
+  where decoderRing val = parseMaybe parseJSON val :: Maybe Resource
 
 pullAggsKey :: Text -> Value -> Maybe (Vector Value)
-pullAggsKey key esResult = 
+pullAggsKey aggName esResult = 
   esResult 
     ^? _Object 
     . ix "aggregations" 
     . _Object 
-    . ix key 
+    . ix aggName 
     . _Object 
     . ix "buckets" 
     . _Array
+
+getAggBucketKey :: Value -> Maybe Text
+getAggBucketKey obj = obj ^? _Object . ix "key" . _String
+
+getKeyCount :: Text -> Maybe (Vector Value) -> Maybe Int
+getKeyCount key_ resourceTotals = 
+  let
+    keyTotal = V.filter (\obj -> getAggBucketKey obj == Just key_) <$> resourceTotals
+    maybeNum = L.headMaybe $ keyTotal ^.. folded . traverse . ix "doc_count"
+  in case fromJSON <$> maybeNum :: Maybe (Result Int) of
+    Nothing -> Nothing
+    Just (Error _) -> Nothing
+    Just (Success intg) -> Just intg
 
 
 -- | Common queries

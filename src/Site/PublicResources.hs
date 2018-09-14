@@ -1,15 +1,18 @@
 module Site.PublicResources where
 
+import           Control.Lens
+import           Data.Aeson.Lens
 import           Data.ByteString.Lazy        ( fromStrict )
+import           Data.Maybe
 import           Data.Text                   ( Text )
 import           Data.Text.Encoding          ( encodeUtf8 )
 import           RIO                  hiding ( Handler )
 import           RIO.List                    ( headMaybe )
+import qualified RIO.HashMap              as HM
 import           Servant
 import           Servant.Server
 import           Servant.HTML.Blaze
 import           Text.Blaze.Html             ( Html )
-
 import           Site.Config
 import           Site.Search
 import           Site.Types
@@ -35,7 +38,7 @@ publicApi = Proxy
 publicHandlers :: ServerT PublicApi EkadantaApp
 publicHandlers =
   getPostListH
-  :<|> getPostListPageH
+  :<|> getPostListPageNumH
   :<|> getPostH
   :<|> searchResultsPostH
   :<|> aboutGetH
@@ -45,15 +48,23 @@ publicHandlers =
 
 
 getPostListH :: EkadantaApp Html
-getPostListH = do
-  config     <- asks _getConfig
-  let query = searchPaginatingQ BlogPost Nothing 0
-  postList  <- liftIO $ searchContent config query
-  case resourcesResp of
-    Left err -> pure . Left $ "Failed looking up content"
-    Right result -> do
-      
+getPostListH = getPostListPageNumH 1
 
+getPostListPageNumH :: Int -> EkadantaApp Html
+getPostListPageNumH pgNum = do
+  let query = searchPaginatingQ BlogPost Nothing $ (pgNum - 1) * _DEFAULT_PAGE_COUNT)
+  config     <- asks _getConfig
+  resourcesResp  <- liftIO $ searchContent config query
+  case resourcesResp of
+    Left err -> throwError $ error400 "Failed looking up content"
+    Right result -> do
+      let resources = pullHitsResources result
+          resourceTotals = pullAggsKey "counts" result
+          postTotal =  getKeyCount "BlogPost" resourceTotals
+          pageCount = if isJust postTotal then fromJust postTotal else 0
+          tagCounts = pullAggsKey "tags" result
+          tagList = tagCounts ^.. folded ^.. traverse . (_Object . ix "key" . _String)
+      pure $ contentListPage (pageCount, pgNum) BlogPost tagList resources
 
 homeH :: EkadantaApp Html
 homeH = do
