@@ -3,13 +3,14 @@ module Site.Search where
 import           Control.Lens
 import           Data.Aeson
 import           Data.Aeson.Lens
-import           Data.Aeson.Types         ( parseMaybe, Result(..) )
+import           Data.Aeson.Types         ( parseMaybe, parseEither, Result(..) )
+import           Data.Bifunctor           ( first )
 import           Data.Maybe               ( catMaybes )
 import qualified Data.Text                as T
 import qualified Data.UUID                as UUID
 import qualified Data.UUID.V4             as UUID4
 import           Network.HTTP.Client      hiding (Proxy)
-import           RIO
+import           RIO                      hiding ( first )
 import qualified RIO.HashMap              as HM
 import qualified RIO.List                 as L
 import qualified RIO.Vector               as V
@@ -21,7 +22,18 @@ import           Site.Config
 import           Site.Types
 
 
--- | Higher-level useful search functions 
+-- | Higher-level useful search functions
+getDocument :: SiteConfig -> UUID.UUID -> IO (Either Text Resource)
+getDocument config uid = do
+  resourcesResp <- getContent config uid
+  case resourcesResp of
+    Left err -> pure . Left $ "Failed looking up content"
+    Right value -> do
+      let parseobj obj = parseEither parseJSON obj :: Either String Resource
+      case value ^? _Object . ix "_source" of
+        Nothing -> pure . Left $ "Failed looking up content"
+        Just obj -> pure $ first T.pack $ parseobj obj
+
 getResourceHits :: SiteConfig -> Value -> IO (Either Text [Resource])
 getResourceHits config query = do
   resourcesResp <- searchContent config query

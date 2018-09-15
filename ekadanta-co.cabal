@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 5f341155dbb784db52699dcd55f58cb56f6fc5bf71dfe3fc8ab020b93c07d798
+-- hash: b1e95c82f9b2e0b252cc69a1da0ff7f43d3f74f4f815f427880e351b496ab8e2
 
 name:           ekadanta-co
 version:        0.1.0.0
@@ -48,6 +48,7 @@ library
   build-depends:
       aeson
     , base >=4.7 && <5
+    , bifunctors
     , blaze-html
     , bytestring
     , cmark
@@ -81,6 +82,7 @@ executable ekadanta-co
   build-depends:
       aeson
     , base >=4.7 && <5
+    , bifunctors
     , blaze-html
     , bytestring
     , cmark
@@ -118,6 +120,7 @@ test-suite ekadanta-co-test
   build-depends:
       aeson
     , base >=4.7 && <5
+    , bifunctors
     , blaze-html
     , bytestring
     , cmark
