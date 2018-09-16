@@ -1,10 +1,32 @@
-module Site where
+module Site (
+  hoister
+  , ekadantaApp
+  , jsonRequestLogger
+  , EkadantaApp(..)
+  , EkadantaCtx(..)
+  , Environment(..)
+  , SiteConfig(..)
+  , LogMessage(..)
+) where
 
-import RIO
+import Network.Wai (Application)
+import RIO hiding ( Handler )
 import Servant
 
-import Site.Html.Base as X
-import Site.Html.Home as X
-import Site.Html.ContentDetail as X
-import Site.Html.ContentList as X
+import Site.Config as X
+import Site.Loggers as X
+import Site.PublicResources as X
 import Site.Types as X
+
+
+
+hoister :: EkadantaCtx -> EkadantaApp a -> Handler a
+hoister = runRIO
+
+
+ekadantaApp :: EkadantaCtx -> Application
+ekadantaApp ctx = 
+  serve publicApi $ 
+    hoistServer publicApi (hoister ctx) publicHandlers
+
+

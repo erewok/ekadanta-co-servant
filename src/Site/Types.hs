@@ -51,32 +51,8 @@ defaultResource = Resource {
   }
 
 instance FromForm Resource
-
-instance FromJSON Resource where
-  parseJSON = withObject "resource" $ \o -> Resource
-    <$> o .: "_pubdate"
-    <*> o .: "_resourceType"
-    <*> o .: "_contentEncoding"
-    <*> o .:? "_featuredImage"
-    <*> o .: "_published"
-    <*> o .: "_body"
-    <*> o .: "_title"
-    <*> o .: "_lede"
-    <*> o .: "_tags"
-    <*> o .: "_pid"
-
-instance ToJSON Resource where
-  toJSON res = object [
-    "_pubdate" .= _pubdate res
-    , "_resourceType" .= (toJSON $ _resourceType res)
-    , "_contentEncoding" .= (toJSON $ _contentEncoding res)
-    , "_featuredImage" .= (toJSON $ _featuredImage res)
-    , "_published" .= _published res
-    , "_body" .= _body res
-    , "_title" .= _title res
-    , "_lede" .= _lede res
-    , "_tags" .= (toJSON (_tags res :: [Text]))
-    , "_pid" .= _pid res ]
+instance FromJSON Resource
+instance ToJSON Resource
 
 -- | Resource Types used on the site: to be stored generically in JSON store (Elasticsearch)
 data ResourceType = BlogPost
@@ -86,9 +62,9 @@ data ResourceType = BlogPost
 
 parseResourceType :: T.Text -> Either T.Text ResourceType
 parseResourceType val
-  | val == "blogpost" = Right BlogPost
-  | val == "about"    = Right About
-  | val == "project"  = Right Project
+  | val == "BlogPost" = Right BlogPost
+  | val == "About"    = Right About
+  | val == "Project"  = Right Project
   | otherwise         = Left ("Not a ResourceType: " <> val)
 
 instance FromJSON ResourceType
@@ -116,8 +92,8 @@ instance ToForm ContentEncoding where
 
 parseContentEncoding :: T.Text -> Either T.Text ContentEncoding
 parseContentEncoding val
-  | val == "markdown" = Right ContentMarkdown
-  | val == "html"    = Right ContentHtml
+  | val == "ContentMarkdown" = Right ContentMarkdown
+  | val == "ContentHtml"    = Right ContentHtml
   | otherwise         = Left ("Not a ContentEncoding: " <> val)
 
 

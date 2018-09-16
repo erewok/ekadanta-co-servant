@@ -53,7 +53,7 @@ homeLatestPostSection post =
           H.h3 $ H.toMarkup (post ^. Types.title)
           H.p $ H.toMarkup (post ^. Types.lede)
           H.div ! A.class_ "home-latest-post-read-more" $
-            H.a ! A.href (H.toValue $ "/posts" <> post ^. Types.pid) $
+            H.a ! A.href (H.toValue $ "/posts/" <> post ^. Types.pid) $
               "Read More..."
 
 
@@ -61,7 +61,7 @@ homeLatestPostSection post =
 
 renderHomeProject :: Int -> Types.Resource -> Html
 renderHomeProject projectNum project = 
-  H.div ! A.class_ (H.toValue (T.unpack "home-project" <> show projectNum)) $ do
+  H.div ! A.class_ (H.toValue (T.unpack "home-project home-project" <> show projectNum)) $ do
 
     homeProjectTagList project
 

@@ -27,47 +27,61 @@ import           Site.Html.ContentList
 
 
 type PublicApi = 
-  "posts" :> Get '[Html] Html
-  :<|> "posts" :> Capture "pgNum" Int :> Get '[Html] Html
-  :<|> "posts" :> Capture "post_id" UUID.UUID :> Get '[Html] Html
-  :<|> "search" :> ReqBody '[FormUrlEncoded] Text :> Post '[HTML] Html
-  :<|> "about" :> Get '[Html] Html
-  :<|> "contact" :> Get '[Html] Html
+  "posts" :> Get '[HTML] Html
+  :<|> "projects" :> Get '[HTML] Html
+  :<|> "posts" :> Capture "pgNum" Int :> Get '[HTML] Html
+  :<|> "projects" :> Capture "pgNum" Int :> Get '[HTML] Html
+  :<|> "posts" :> Capture "post_id" UUID.UUID :> Get '[HTML] Html
+  :<|> "projects" :> Capture "post_id" UUID.UUID :> Get '[HTML] Html
+  :<|> "search" :> ReqBody '[FormUrlEncoded] SearchForm :> Post '[HTML] Html
+  :<|> "about" :> Get '[HTML] Html
+  :<|> "contact" :> Get '[HTML] Html
   :<|> "contact" :> ReqBody '[FormUrlEncoded] ContactForm :> Post '[HTML] Html
-  :<|> Get '[Html] Html
+  :<|> Get '[HTML] Html
+  :<|> "static" :> Raw
 
 publicApi :: Proxy PublicApi
 publicApi = Proxy
 
 publicHandlers :: ServerT PublicApi EkadantaApp
 publicHandlers =
-  getPostListH
-  :<|> getPostListPageNumH
-  :<|> getPostH
+  getPaginatedContent BlogPost 1
+  :<|> getPaginatedContent Project 1
+  :<|> getPaginatedContent BlogPost
+  :<|> getPaginatedContent Project
+  :<|> getResourceH
+  :<|> getResourceH
   :<|> searchResultsPostH
   :<|> aboutGetH
   :<|> contactGetH
   :<|> contactPostH
   :<|> homeH
+  :<|> serveDirectoryFileServer "static"
 
-
--- | Post List result for first page of posts
-getPostListH :: EkadantaApp Html
-getPostListH = getPostListPageNumH 1
-
-
--- | Post list later pages result
-getPostListPageNumH :: Int -> EkadantaApp Html
-getPostListPageNumH pgNum = do
-  let query = searchPaginatingQ BlogPost Nothing $ (pgNum - 1) * _DEFAULT_PAGE_COUNT
+-- | Generic retrieval handler that will lookup content and return Detail Page for it
+getPaginatedContent :: ResourceType -> Int -> EkadantaApp Html
+getPaginatedContent rt pgNum = do
+  let query = searchPaginatingQ rt Nothing $ (pgNum - 1) * _DEFAULT_PAGE_COUNT
   config     <- asks _getConfig
   resourcesResp  <- liftIO $ searchContent config query
-  searchContentListProcessor pgNum resourcesResp BlogPost
+  searchContentListProcessor pgNum resourcesResp rt
 
+searchContentListProcessor :: Int -> Either ServantError Value -> ResourceType -> EkadantaApp Html
+searchContentListProcessor pgNum searchResult rt =
+  case searchResult of
+    Left err -> throwM $ err400 { errBody = "Failed looking up content" }
+    Right result -> do
+      let resources = pullHitsResources result
+          resourceTotals = pullAggsKey "counts" result
+          postTotal =  getKeyCount (pack . show $ rt) resourceTotals
+          pageCount = if isJust postTotal then fromJust postTotal else 0
+          tagCounts = pullAggsKey "tags" result
+          tagList = tagCounts ^.. folded . traverse . (_Object . ix "key" . _String)
+      pure $ contentListPage (pageCount, pgNum) rt tagList resources
 
 -- | Get a particular post by its uid
-getPostH :: UUID.UUID -> EkadantaApp Html
-getPostH uid = do
+getResourceH :: UUID.UUID -> EkadantaApp Html
+getResourceH uid = do
   config     <- asks _getConfig
   resourcesResp  <- liftIO $ getDocument config uid
   case resourcesResp of
@@ -76,11 +90,11 @@ getPostH uid = do
 
 
 -- | Post search results from a text input
-searchResultsPostH :: Text -> EkadantaApp Html
-searchResultsPostH q = do
-  let query      = searchContentQ q
+searchResultsPostH :: SearchForm -> EkadantaApp Html
+searchResultsPostH sform = do
+  let q          = searchContentQ ( query sform )
   config         <- asks _getConfig
-  resourcesResp  <- liftIO $ searchContent config query
+  resourcesResp  <- liftIO $ searchContent config q
   searchContentListProcessor 0 resourcesResp BlogPost
 
 
@@ -125,19 +139,7 @@ homeH = do
 
 
 -- | Helper functions, not handlers
-searchContentListProcessor :: Int -> Either ServantError Value -> ResourceType -> EkadantaApp Html
-searchContentListProcessor pgNum searchResult rt =
-  case searchResult of
-    Left err -> throwM $ err400 { errBody = "Failed looking up content" }
-    Right result -> do
-      let resources = pullHitsResources result
-          resourceTotals = pullAggsKey "counts" result
-          postTotal =  getKeyCount (pack . show $ rt) resourceTotals
-          pageCount = if isJust postTotal then fromJust postTotal else 0
-          tagCounts = pullAggsKey "tags" result
-          tagList = tagCounts ^.. folded . traverse . (_Object . ix "key" . _String)
-      pure $ contentListPage (pageCount, pgNum) rt tagList resources
-        
+    
 
 error400 :: Text -> ServantErr
 error400 msg = err400 { errBody = fromStrict . encodeUtf8 $ msg }

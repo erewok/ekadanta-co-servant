@@ -48,8 +48,8 @@ siteWideContentHead :: Html
 siteWideContentHead = 
   H.header ! A.class_ "site-wide-head" $ do
     H.div ! A.class_ "site-head-logo" $ do
-      H.div ! A.class_ "logo-left" $ "ekadanta"
-      H.div ! A.class_ "logo-right" $ ".co"
+      H.div ! A.class_ "logo-left" $ H.a ! A.href "/" $ "ekadanta"
+      H.div ! A.class_ "logo-right" $ H.a ! A.href "/" $ ".co"
     siteWideNav
 
 
@@ -70,13 +70,13 @@ siteWideHead =
 
 siteWideFooter :: Html
 siteWideFooter = 
-  H.footer $ do
+  H.footer ! A.id "site-footer" $ do
     H.p ! A.class_ "footer-copyright" $ "Ekadanta.co Copyright (c) 2018 Erik Aker"
     H.p ! A.class_ "footer-attribution" $ do
       void "Site designed by "
       H.a ! A.href "https://www.linkedin.com/in/jonwhitmire" ! A.target "_blank" $ "Jon Whitmire"
     H.p ! A.class_ "footer-footenote" $ do
-      void "This site is"
+      void "This site is "
       H.a ! A.href "https://gitlab.com/erewok/ekadanta-co-servant" ! A.target "_blank" $ "open source"
     H.script $ H.text googAnalytics
     

@@ -2,14 +2,14 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: b1e95c82f9b2e0b252cc69a1da0ff7f43d3f74f4f815f427880e351b496ab8e2
+-- hash: 1df1f009ab7b8a418822c69cea27a738d69a066f5c9b2ce1ad1bb87d39af69cc
 
 name:           ekadanta-co
 version:        0.1.0.0
 description:    Please see the README on GitHub at <https://github.com/erewok/ekadanta-co#readme>
 homepage:       https://github.com/erewok/ekadanta-co#readme
 bug-reports:    https://github.com/erewok/ekadanta-co/issues
-author:         Author name here
+author:         Erik Aker
 maintainer:     eraker@gmail.com
 copyright:      2018 Erik aker
 license:        BSD3
@@ -37,6 +37,7 @@ library
       Site.Html.ContentDetail
       Site.Html.ContentList
       Site.Html.Home
+      Site.Loggers
       Site.PublicResources
       Site.Search
       Site.Types
@@ -52,6 +53,7 @@ library
     , blaze-html
     , bytestring
     , cmark
+    , data-default
     , envy
     , fast-logger
     , http-api-data
@@ -69,6 +71,7 @@ library
     , time
     , uuid
     , wai
+    , wai-extra
   default-language: Haskell2010
 
 executable ekadanta-co
@@ -86,11 +89,13 @@ executable ekadanta-co
     , blaze-html
     , bytestring
     , cmark
+    , data-default
     , ekadanta-co
     , envy
     , fast-logger
     , http-api-data
     , http-client
+    , http-types
     , lens
     , lens-aeson
     , mime-mail
@@ -124,6 +129,7 @@ test-suite ekadanta-co-test
     , blaze-html
     , bytestring
     , cmark
+    , data-default
     , ekadanta-co
     , envy
     , fast-logger
@@ -142,4 +148,5 @@ test-suite ekadanta-co-test
     , time
     , uuid
     , wai
+    , wai-extra
   default-language: Haskell2010

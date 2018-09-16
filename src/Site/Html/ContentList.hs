@@ -24,9 +24,10 @@ contentListPageBuilder :: PageNum -> ResourceType -> AllSiteTags -> [Resource] -
 contentListPageBuilder pgNum rtype allTags content = do
   makeSectionHead rtype
   H.div ! A.class_ "row" $ do
-   renderContentList content
-   renderPaginator pgNum
-   renderSearchSection content allTags
+    H.div ! A.class_ "eight columns content-list" $ do
+      renderContentList content
+      renderPaginator pgNum
+    renderSearchSection content allTags
 
 
 makeSectionHead :: ResourceType -> Html
@@ -64,8 +65,14 @@ renderContentListItemLede item =
     H.h3 $ H.toMarkup (item ^. title)
     H.p $ H.toMarkup (item ^. lede)
     H.div ! A.class_ "content-list-item-read-more" $
-      H.a ! A.href (H.toValue $ "/projects" <> item ^. pid) $ "Read More..."
+      readMoreLink item
 
+
+readMoreLink :: Resource -> Html
+readMoreLink item = 
+  if (item ^. resourceType) == BlogPost
+    then H.a ! A.href (H.toValue $ "/posts/" <> item ^. pid) $ "Read More..."
+    else H.a ! A.href (H.toValue $ "/projects/" <> item ^. pid) $ "Read More..."
 
 renderContentListItemTagList :: [Text] -> Html
 renderContentListItemTagList tags =
@@ -107,10 +114,10 @@ makeMaybeValidRightArrow totalPages currentPageNum =
 renderSearchSection :: [Resource] -> AllSiteTags -> Html
 renderSearchSection content allTags =
   H.div ! A.class_ "four columns" $ do
-    H.form $
-      H.input ! A.class_ "u-full-width" ! A.placeholder "search ekadanta.co" ! A.type_ "text"
+    H.form ! A.method "post" ! A.action "/search" $
+      H.input ! A.class_ "u-full-width" ! A.placeholder "search ekadanta.co" ! A.name "query" ! A.type_ "text"
     H.h3 "Tags"
-    H.ul $ renderSearchTags (mconcat $ map _tags content) allTags
+    H.ul ! A.class_ "content-search-tags" $ renderSearchTags (mconcat $ map _tags content) allTags
 
 renderSearchTags :: [Text] -> AllSiteTags -> Html
 renderSearchTags currentTags allTags = do

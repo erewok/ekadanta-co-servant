@@ -58,10 +58,16 @@ renderDetailContent post = do
       H.h3 ! A.class_ "content-detail-title" $ H.toMarkup (post ^. Types.title)
       H.span ! A.class_ "content-detail-lede" $ H.toMarkup (post ^. Types.lede)
 
-    H.div ! A.class_ "content-detail-body-content" $ H.toMarkup (Mark.commonmarkToHtml [] $ post ^. Types.body)
+    H.div ! A.class_ "content-detail-body-content" $ renderBodyAsHtmlOrMarkdown post
     
     H.div ! A.class_ "content-detail-contact" $
       H.ul ! A.class_ "content-detail-body-contact-links" $ contactLinks
+
+renderBodyAsHtmlOrMarkdown :: Types.Resource -> Html
+renderBodyAsHtmlOrMarkdown post =
+  if (post ^. Types.contentEncoding) == Types.ContentMarkdown
+    then  H.preEscapedToHtml (Mark.commonmarkToHtml [] $ post ^. Types.body)
+    else H.preEscapedToHtml (post ^. Types.body)
 
 
 type FeaturedImg = Maybe Text

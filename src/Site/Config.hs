@@ -17,7 +17,7 @@ type EkadantaApp = RIO EkadantaCtx
 
 data EkadantaCtx = EkadantaCtx {
   _getConfig   :: SiteConfig
-  , _getKigger :: LoggerSet
+  , _getLogger :: LoggerSet
   }
 
 data Environment = Local

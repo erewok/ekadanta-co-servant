@@ -2,7 +2,7 @@ name:                ekadanta-co
 version:             0.1.0.0
 github:              "erewok/ekadanta-co"
 license:             BSD3
-author:              "Author name here"
+author:              "Erik Aker"
 maintainer:          "eraker@gmail.com"
 copyright:           "2018 Erik aker"
 
@@ -26,6 +26,7 @@ dependencies:
 - blaze-html
 - bytestring
 - cmark
+- data-default
 - envy
 - fast-logger
 - http-api-data
@@ -43,6 +44,7 @@ dependencies:
 - time
 - uuid
 - wai
+- wai-extra
 
 default-extensions:
   - DataKinds
@@ -74,6 +76,7 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - ekadanta-co
+    - http-types
     - wai
     - wai-extra
     - warp

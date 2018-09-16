@@ -17,6 +17,9 @@ import qualified RIO.Vector               as V
 import           Servant.API
 import           Servant.Client
 import           Servant.Server
+import           Web.FormUrlEncoded                (Form(..)
+                                                  , FromForm(..)
+                                                  , ToForm(..))
 
 import           Site.Config
 import           Site.Types
@@ -29,10 +32,9 @@ getDocument config uid = do
   case resourcesResp of
     Left err -> pure . Left $ "Failed looking up content"
     Right value -> do
-      let parseobj obj = parseEither parseJSON obj :: Either String Resource
       case value ^? _Object . ix "_source" of
         Nothing -> pure . Left $ "Failed looking up content"
-        Just obj -> pure $ first T.pack $ parseobj obj
+        Just obj -> pure $ decodeEitherResource obj
 
 getResourceHits :: SiteConfig -> Value -> IO (Either Text [Resource])
 getResourceHits config query = do
@@ -44,26 +46,28 @@ getResourceHits config query = do
 pullHitsResources :: Value -> [Resource]
 pullHitsResources value = 
   let
-    sources = value 
-      ^? _Object 
-      . ix "hits" 
-      . ix "hits"
-      . _Array 
-      ^.. folded 
-      . traverse 
-      . (_Object . ix "_source")
-  in catMaybes $ map decoderRing sources
-  where decoderRing val = parseMaybe parseJSON val :: Maybe Resource
+    sources = 
+      value 
+        ^? key "hits" 
+        . key "hits"
+        . _Array 
+        ^.. folded 
+        . traverse 
+        . (key "_source")
+  in catMaybes $ map decodeMaybeResource sources
+
+decodeEitherResource :: Value -> Either Text Resource
+decodeEitherResource val = first T.pack $ parseEither parseJSON val
+
+decodeMaybeResource :: Value -> Maybe Resource
+decodeMaybeResource = parseMaybe parseJSON 
 
 pullAggsKey :: Text -> Value -> Maybe (Vector Value)
 pullAggsKey aggName esResult = 
   esResult 
-    ^? _Object 
-    . ix "aggregations" 
-    . _Object 
-    . ix aggName 
-    . _Object 
-    . ix "buckets" 
+    ^? key "aggregations"
+    . key aggName
+    . key "buckets"
     . _Array
 
 getAggBucketKey :: Value -> Maybe Text
@@ -208,10 +212,15 @@ mkSearchClient =
 
 clientEnv :: SiteConfig -> IO ClientEnv
 clientEnv config = do
-  baseUrl <- parseBaseUrl $ T.unpack . esHost $ config
+  baseUrl <- parseBaseUrl $ T.unpack $ ( esHost config ) <> ":" <> ( esPort config )
   manager <- newManager defaultManagerSettings
   pure $ mkClientEnv manager baseUrl
 
 runSearchClient :: SiteConfig -> ClientM a -> IO (Either ServantError a)
 runSearchClient config = (clientEnv config >>=) . runClientM
 
+-- | forms
+data SearchForm  = SearchForm { query :: Text } deriving (Eq, Show, Generic)
+
+instance FromForm SearchForm
+instance ToForm SearchForm
