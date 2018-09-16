@@ -153,16 +153,16 @@ project cards
   grid-column-gap: 40px;
   grid-auto-rows: minmax(100px, auto);
   grid-template-areas:
-  "project1 project2 project3"
+    "project1 project2 project3";
 }
 
 @media(max-width: 750px) {
   .home-projects {
     grid-template-columns: repeat(1, 3fr);
     grid-template-areas:
-    "project1"
-    "project2"
-    "project3"
+      "project1"
+      "project2"
+      "project3";
   }
 }
 
@@ -195,10 +195,10 @@ each project card
   grid-row-gap: 2px;
   grid-template-rows: 0.5fr 1fr 3fr 1fr;
   grid-template-areas:
-  "project-card-tags project-card-tags"
-  "project-card-title project-card-title"
-  "project-card-text project-card-text"
-  ". project-card-button"
+    "project-card-tags  project-card-tags"
+    "project-card-title project-card-title"
+    "project-card-text  project-card-text"
+    ".                  project-card-button";
 }
 
 @media(max-width: 750px) {
@@ -240,6 +240,7 @@ each project card
   border-radius: 6px;
   font-size: 1.25rem;
   text-align: center;
+  margin-right: 5px;
   padding: 5px 10px;
   color: rgb(23, 144, 106);
   max-width: 20%;

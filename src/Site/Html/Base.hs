@@ -13,8 +13,7 @@ import qualified Text.Blaze.Html5.Attributes as A
 
 pageSkeleton :: Html -> Html
 pageSkeleton content = 
-  H.docTypeHtml $
-    H.html $ do
+  H.docTypeHtml $ do
       siteWideHead
       pageContentWrapper content
 

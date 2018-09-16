@@ -117,7 +117,7 @@ renderSearchSection content allTags =
     H.form ! A.method "post" ! A.action "/search" $
       H.input ! A.class_ "u-full-width" ! A.placeholder "search ekadanta.co" ! A.name "query" ! A.type_ "text"
     H.h3 "Tags"
-    H.ul ! A.class_ "content-search-tags" $ renderSearchTags (mconcat $ map _tags content) allTags
+    H.ul ! A.class_ "content-search-tags" $ renderSearchTags (foldMap _tags content) allTags
 
 renderSearchTags :: [Text] -> AllSiteTags -> Html
 renderSearchTags currentTags allTags = do
@@ -127,6 +127,6 @@ renderSearchTags currentTags allTags = do
       makeActiveTag tg = H.li ! A.class_ "active" $ H.toMarkup tg
       makeInactiveTag = H.li . H.toMarkup
 
-  mconcat $ map makeActiveTag currentTags
-  mconcat $ map makeInactiveTag (HS.toList inactiveTags)
+  foldMap makeActiveTag (HS.toList activeHashTags)
+  foldMap makeInactiveTag (HS.toList inactiveTags)
   

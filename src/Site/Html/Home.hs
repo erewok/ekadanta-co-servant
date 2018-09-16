@@ -33,7 +33,12 @@ homeAboutSection =
 homeAboutContent :: Html
 homeAboutContent = do
   H.h1 "👋 Hi, I'm Erik."
-  H.p "I'm a former English teacher and freelance writer. Now I work as a software developer in San Diego, California. My areas of expertise are Python, Javascript, ETL, DevOps, cloud infrastructure, and application design."
+  H.p . H.toMarkup . T.unlines $ ["I'm a former English teacher and freelance writer. " 
+                                , "Now I work as a software developer in San Diego, California." 
+                                , "My areas of expertise are Python, Javascript, ETL, DevOps, cloud infrastructure, "
+                                , " and application design."]
+  H.p . H.toMarkup . T.unlines $ ["My interests include functional programming in Haskell," 
+                                 ," natural language processing, surfing, and playing with Milo (my son)."]
 
 homeProjectsSection :: [Types.Resource] -> Html
 homeProjectsSection projects = 
@@ -61,7 +66,7 @@ homeLatestPostSection post =
 
 renderHomeProject :: Int -> Types.Resource -> Html
 renderHomeProject projectNum project = 
-  H.div ! A.class_ (H.toValue (T.unpack "home-project home-project" <> show projectNum)) $ do
+  H.div ! A.class_ (H.toValue (T.unpack "home-project project" <> show projectNum)) $ do
 
     homeProjectTagList project
 
