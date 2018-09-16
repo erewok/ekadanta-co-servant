@@ -2,8 +2,8 @@ FROM debian:stretch-slim as builder
 
 SHELL ["/bin/bash", "-Eeuxo", "pipefail", "-c"]
 
-RUN apt update && \
-    app install --no-install-recommends -y \
+RUN apt-get update && \
+    apt-get install --no-install-recommends -y \
     build-essential \
     libffi-dev \
     libgmp-dev \
@@ -28,8 +28,8 @@ RUN stack install
 
 FROM debian:stretch-slim as base_os
 
-RUN apt update && \
-    app install -y \
+RUN apt-get update && \
+    apt-get install -y \
     build-essential \
     libffi-dev \
     libgmp-dev \
