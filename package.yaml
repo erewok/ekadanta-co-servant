@@ -100,4 +100,3 @@ tests:
     - warp
     - aeson
     - aseon-lens
-    - -transformers
