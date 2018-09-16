@@ -99,4 +99,4 @@ tests:
     - wai-extra
     - warp
     - aeson
-    - aseon-lens
+    - lens-aeson
