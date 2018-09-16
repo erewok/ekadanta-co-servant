@@ -160,10 +160,10 @@ docTypeCount :: Value
 docTypeCount = Object $ HM.fromList [ ( "terms", Object $ HM.fromList [( "field", String "_resourceType" ), ("size", Number 5) ] )]
 
 -- | Client functions for interacting with our index/documents
-indexContent :: SiteConfig -> ResourceType -> IO (Either ServantError Value)
+indexContent :: SiteConfig -> Resource -> IO (Either ServantError Value)
 indexContent config item = do
   uid <- UUID4.nextRandom
-  let indexer = indexSearchContent mkSearchClient
+  let indexer = indexDocument mkSearchClient
   runSearchClient config $ indexer uid item
 
 getContent :: SiteConfig -> UUID.UUID -> IO (Either ServantError Value)
@@ -192,7 +192,7 @@ type SearchAPI =
   "ekadanta" :> ReqBody '[JSON] Value :> Put '[JSON] Value
   :<|> "ekadanta" :> "content" :> "_search" :> ReqBody '[JSON] Value :> Post '[JSON] Value
   :<|> "ekadanta" :> "content" :> Capture "docId" UUID.UUID :> Get '[JSON] Value
-  :<|> "ekadanta" :> "content" :> Capture "docId" UUID.UUID :> ReqBody '[JSON] ResourceType :> Put '[JSON] Value
+  :<|> "ekadanta" :> "content" :> Capture "docId" UUID.UUID :> ReqBody '[JSON] Resource :> Put '[JSON] Value
 
 data SearchClient = 
   SearchClient 
@@ -200,13 +200,13 @@ data SearchClient =
   createSearchIndex :: Value -> ClientM Value
   , searchIndexContent :: Value -> ClientM Value
   , getSearchContent :: UUID.UUID -> ClientM Value
-  , indexSearchContent :: UUID.UUID -> ResourceType -> ClientM Value
+  , indexDocument :: UUID.UUID -> Resource -> ClientM Value
   } 
 
 mkSearchClient :: SearchClient
 mkSearchClient = 
   let 
-    createSearchIndex :<|> searchIndexContent :<|> getSearchContent :<|> indexSearchContent
+    createSearchIndex :<|> searchIndexContent :<|> getSearchContent :<|> indexDocument
       = client (Proxy :: Proxy SearchAPI)
   in SearchClient {..}
 

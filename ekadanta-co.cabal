@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 1df1f009ab7b8a418822c69cea27a738d69a066f5c9b2ce1ad1bb87d39af69cc
+-- hash: 9cb26887e23bb2e741d739d852c174bc261c2d10e06e532c83cec3e920146acd
 
 name:           ekadanta-co
 version:        0.1.0.0
@@ -117,13 +117,16 @@ test-suite ekadanta-co-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      PublicResourcesSpec
       Paths_ekadanta_co
   hs-source-dirs:
       test
   default-extensions: DataKinds DeriveGeneric GADTs InstanceSigs LambdaCase MultiWayIf NoImplicitPrelude OverloadedStrings RecordWildCards ScopedTypeVariables TypeOperators UnicodeSyntax
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      aeson
+      QuickCheck
+    , aeson
+    , aseon-lens
     , base >=4.7 && <5
     , bifunctors
     , blaze-html
@@ -133,6 +136,9 @@ test-suite ekadanta-co-test
     , ekadanta-co
     , envy
     , fast-logger
+    , hspec
+    , hspec-wai
+    , hspec-wai-json
     , http-api-data
     , http-client
     , lens
@@ -149,4 +155,5 @@ test-suite ekadanta-co-test
     , uuid
     , wai
     , wai-extra
+    , warp
   default-language: Haskell2010

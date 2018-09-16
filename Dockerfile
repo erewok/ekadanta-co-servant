@@ -20,7 +20,7 @@ WORKDIR /opt/ekadanta-co/
 
 COPY stack.yaml package.yaml ChangeLog.md README.md /opt/ekadanta-co/
 
-RUN stack --no-terminal --install-ghc install --only-dependencies
+RUN stack --no-terminal --install-ghc build --only-dependencies
 
 COPY . /opt/ekadanta-co
 
