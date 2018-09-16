@@ -1,0 +1,2 @@
+module PublicResourcesSpec where
+

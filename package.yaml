@@ -91,3 +91,13 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - ekadanta-co
+    - hspec
+    - hspec-wai
+    - hspec-wai-json
+    - QuickCheck
+    - wai
+    - wai-extra
+    - warp
+    - aeson
+    - aseon-lens
+    - -transformers
