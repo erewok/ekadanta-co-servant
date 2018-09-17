@@ -25,7 +25,7 @@ import           Site.Types
 
 
 spec :: Spec
-spec = around withElasticsearch $ do
+spec = around_ withElasticsearch $ do
   ctx <- runIO makeCtx
   with (pure $ ekadantaApp ctx) $
     describe "GET /posts" $
