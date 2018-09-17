@@ -1,27 +1,28 @@
 module Main where
 
+import           Data.Aeson
 import qualified Data.ByteString.Lazy.Char8 as LBS
 import           Data.Either
-import           Data.Time.Clock                     ( getCurrentTime )
+import           Data.Time.Clock                       ( getCurrentTime )
 import           Network.HTTP.Types
 import qualified Network.Wai                        as Wai
 import qualified Network.Wai.Handler.Warp           as Warp
-import           Prelude                              ( print )
+import           Prelude                               ( print )
 import           RIO
 import           System.Envy
-import           System.Log.FastLogger                ( newStdoutLoggerSet 
-                                                      , defaultBufSize
-                                                      , pushLogStrLn
-                                                      , flushLogStr
-                                                      , ToLogStr(..) )
+import           System.Log.FastLogger                 ( newStdoutLoggerSet 
+                                                       , defaultBufSize
+                                                       , pushLogStrLn
+                                                       , flushLogStr
+                                                       , ToLogStr(..) )
 
 import Site
 
 
 errorMaker :: SomeException -> Wai.Response
 errorMaker someErr = 
-  let showErr = LBS.pack . show $ someErr
-      errMsg = "{\"status\": \"failure\", \"error\": \"" <> showErr <> "\"}"
+  let showErr = encode . show $ someErr
+      errMsg = "{\"status\": \"failure\", \"error\": \"" <> showErr <> "\"}\n"
   in Wai.responseLBS internalServerError500 [(hContentType, "application/json")] errMsg
 
 

@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 9cb26887e23bb2e741d739d852c174bc261c2d10e06e532c83cec3e920146acd
+-- hash: 813cf71491c60d1c13b53797fb03a89b3985e975f72018056ba229dc9067e656
 
 name:           ekadanta-co
 version:        0.1.0.0
@@ -126,7 +126,6 @@ test-suite ekadanta-co-test
   build-depends:
       QuickCheck
     , aeson
-    , aseon-lens
     , base >=4.7 && <5
     , bifunctors
     , blaze-html
