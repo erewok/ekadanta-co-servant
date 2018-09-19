@@ -27,8 +27,9 @@ before_script:
 test:
   stage: test
   script:
-    - stack test
-    
+    - docker build -f Dockerfile.test -t ekadanta-co-testing .
+    - docker run --rm ekadanta-co-testing
+
 
 build-master:
   stage: build

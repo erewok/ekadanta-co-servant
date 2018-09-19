@@ -3,10 +3,13 @@ module PublicResourcesSpec where
 import qualified Control.Concurrent               as C
 import           Data.Aeson
 import           Data.Aeson.Lens
+import           Data.Text.Encoding               ( encodeUtf8 )
 import qualified Data.UUID                        as UUID
 import           Network.Wai
 import qualified Network.Wai.Handler.Warp         as Warp
 import           RIO                       hiding ( Handler )
+import qualified RIO.HashMap                   as HM
+import qualified RIO.Vector                    as V
 import           Servant
 import           System.Log.FastLogger            ( newStdoutLoggerSet 
                                                   , defaultBufSize
@@ -27,10 +30,24 @@ import           Site.Types
 spec :: Spec
 spec = around_ withElasticsearch $ do
   ctx <- runIO makeCtx
-  with (pure $ ekadantaApp ctx) $
+  with (pure $ ekadantaApp ctx) $ do
     describe "GET /posts" $
       it "should return post-list rendered" $
         get "/posts" `shouldRespondWith` 200
+    describe "GET /projects" $
+      it "should return project-list rendered" $
+        get "/projects" `shouldRespondWith` 200
+    describe "GET /posts/2" $
+      it "should return post-list page 2 rendered" $
+        get "/posts/1" `shouldRespondWith` 200
+    describe "GET /projects/2" $
+      it "should return post-list page 2 rendered" $
+        get "/projects/2" `shouldRespondWith` 200
+    describe "GET /posts/<uid>" $ do
+      it "should throw 404 when it can't parse the result" $
+        get (encodeUtf8 $ "/posts/" <> UUID.toText UUID.nil) `shouldRespondWith` 404
+      it "should return a specific post" $
+        get ("/posts/4102f030-a81c-44fa-9a7e-5ddc247297a7") `shouldRespondWith` 200
 
 
 -- | Test environment preparation functions
@@ -61,14 +78,40 @@ esTestServer :: Server SearchAPI
 esTestServer =
   createESIndex :<|> searchESIndex :<|> getESDocument :<|> upsertESDocument
 
-createESIndex :: Value -> Handler Value
-createESIndex = undefined
 
 searchESIndex :: Value -> Handler Value
-searchESIndex = undefined
+searchESIndex (Object hmap) = pure $ Object $ HM.fromList [
+  ("hits", Object $ HM.fromList [ 
+    ("hits", Array $ V.fromList [Object $ HM.fromList [("_source", toJSON defaultPostSource)]] )
+    ] )
+  ]
+searchESIndex _ = pure $ Object $ HM.fromList [("bad", String "data")]  -- This is how we single a failing result
+
 
 getESDocument :: UUID.UUID -> Handler Value
-getESDocument = undefined
+getESDocument uid = 
+  if uid == UUID.nil -- This is how we single a failing result...
+    then pure . Object $ HM.fromList [("bad", String "data")]
+    else pure defaultPostSource
+  
+defaultPostSource :: Value
+defaultPostSource = 
+  toJSON $ Resource {
+    _pubdate = "2018-01-01"
+    , _resourceType = BlogPost
+    , _contentEncoding = ContentMarkdown
+    , _featuredImage = Just "http://some-image" 
+    , _published = True
+    , _body = "This is a post body"
+    , _title = "Post Title"
+    , _lede = "Some posts have some teaser text"
+    , _tags = ["testing", "defaults", "elasticsearch"]
+    , _pid = UUID.toText $ UUID.nil
+  }
+
+
+createESIndex :: Value -> Handler Value
+createESIndex = undefined
 
 upsertESDocument :: UUID.UUID -> Resource -> Handler Value
 upsertESDocument = undefined
