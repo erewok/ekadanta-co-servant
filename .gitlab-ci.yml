@@ -16,11 +16,6 @@ cache:
 
 
 before_script:
-  - apt-get -y update
-  - apt-get -y install libgmp-dev curl build-essential netbase libffi-dev ca-certificates
-  - mkdir -p ~/.local/bin
-  - export PATH=$HOME/.local/bin:$PATH
-  - curl -sSL "https://get.haskellstack.org/" | sh
   - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
 
 

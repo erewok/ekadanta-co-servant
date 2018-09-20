@@ -1,6 +1,6 @@
 FROM debian:stretch-slim as builder
 
-SHELL ["/bin/bash"]
+SHELL ["/bin/bash", "-Eeuxo", "pipefail", "-c"]
 
 RUN apt-get update && \
     apt-get install --no-install-recommends -y \
