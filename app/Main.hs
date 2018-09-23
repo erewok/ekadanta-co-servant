@@ -4,11 +4,13 @@ import           Data.Aeson
 import qualified Data.ByteString.Lazy.Char8 as LBS
 import           Data.Either
 import           Data.Time.Clock                       ( getCurrentTime )
+import           Data.Typeable
 import           Network.HTTP.Types
 import qualified Network.Wai                        as Wai
 import qualified Network.Wai.Handler.Warp           as Warp
 import           Prelude                               ( print )
 import           RIO
+import           Servant.Checked.Exceptions.Internal.Servant.API (ErrStatus(toErrStatus))
 import           System.Envy
 import           System.Log.FastLogger                 ( newStdoutLoggerSet 
                                                        , defaultBufSize
@@ -21,9 +23,9 @@ import Site
 
 errorMaker :: SomeException -> Wai.Response
 errorMaker someErr = 
-  let showErr = encode . show $ someErr
-      errMsg = "{\"status\": \"failure\", \"error\": \"" <> showErr <> "\"}\n"
-  in Wai.responseLBS internalServerError500 [(hContentType, "application/json")] errMsg
+  case (cast someErr :: Maybe AppErrors) of
+    Just myError -> Wai.responseLBS (toErrStatus myError) [(hContentType, "application/json")] $ encode myError
+    Nothing -> Wai.responseLBS internalServerError500 [(hContentType, "application/json")] $ "{\"status\": \"failed\", \"error\": \"" <> (LBS.pack $ show someErr) <> "\"}"
 
 
 main :: IO ()

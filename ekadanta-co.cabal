@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 813cf71491c60d1c13b53797fb03a89b3985e975f72018056ba229dc9067e656
+-- hash: 9406a8b860a66da9ae8241e3866b3a317d4b05e0477b2af44fe9059a6412c0b9
 
 name:           ekadanta-co
 version:        0.1.0.0
@@ -31,6 +31,7 @@ library
       Site
       Site.AdminResources
       Site.Config
+      Site.Exceptions
       Site.Html.Admin
       Site.Html.Base
       Site.Html.Contact
@@ -51,6 +52,7 @@ library
     , base >=4.7 && <5
     , bifunctors
     , blaze-html
+    , blaze-markup
     , bytestring
     , cmark
     , data-default
@@ -58,12 +60,14 @@ library
     , fast-logger
     , http-api-data
     , http-client
+    , http-types
     , lens
     , lens-aeson
     , mime-mail
     , rio
     , servant
     , servant-blaze
+    , servant-checked-exceptions
     , servant-client
     , servant-server
     , smtps-gmail
@@ -72,6 +76,7 @@ library
     , uuid
     , wai
     , wai-extra
+    , world-peace
   default-language: Haskell2010
 
 executable ekadanta-co
@@ -87,6 +92,7 @@ executable ekadanta-co
     , base >=4.7 && <5
     , bifunctors
     , blaze-html
+    , blaze-markup
     , bytestring
     , cmark
     , data-default
@@ -102,6 +108,7 @@ executable ekadanta-co
     , rio
     , servant
     , servant-blaze
+    , servant-checked-exceptions
     , servant-client
     , servant-server
     , smtps-gmail
@@ -111,6 +118,7 @@ executable ekadanta-co
     , wai
     , wai-extra
     , warp
+    , world-peace
   default-language: Haskell2010
 
 test-suite ekadanta-co-test
@@ -129,6 +137,7 @@ test-suite ekadanta-co-test
     , base >=4.7 && <5
     , bifunctors
     , blaze-html
+    , blaze-markup
     , bytestring
     , cmark
     , data-default
@@ -140,12 +149,14 @@ test-suite ekadanta-co-test
     , hspec-wai-json
     , http-api-data
     , http-client
+    , http-types
     , lens
     , lens-aeson
     , mime-mail
     , rio
     , servant
     , servant-blaze
+    , servant-checked-exceptions
     , servant-client
     , servant-server
     , smtps-gmail
@@ -155,4 +166,5 @@ test-suite ekadanta-co-test
     , wai
     , wai-extra
     , warp
+    , world-peace
   default-language: Haskell2010
