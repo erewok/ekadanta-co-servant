@@ -1,11 +1,12 @@
-{-# LANGUAGE DeriveAnyClass       #-}
 {-# LANGUAGE FlexibleContexts     #-}
+{-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE RankNTypes           #-}
-{-# LANGUAGE StandaloneDeriving   #-}
+{-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE UndecidableInstances #-}
 
 module Site.Exceptions where
 
+import           Control.Lens
 import           Data.Aeson
 import           Data.Aeson.Types
 import           Data.Functor.Identity         (Identity(Identity, runIdentity))
@@ -14,7 +15,7 @@ import           Data.WorldPeace               ( IsMember, OpenUnion )
 import           Data.WorldPeace.Union
 import           Network.HTTP.Types
 import           RIO
-import qualified Servant.Checked.Exceptions as SCE
+import           Servant.Checked.Exceptions
 import           Servant.Checked.Exceptions.Internal.Servant.API (ErrStatus(toErrStatus))
 import           Text.Blaze                   (ToMarkup(..), Markup, text)
 
@@ -23,6 +24,7 @@ import           Text.Blaze                   (ToMarkup(..), Markup, text)
 -- content from the Elasticsearch server due to JSON decoding or other issues (400s)
 data AppErrors = MissingContent
                | ContentLoadFailure
+               | UnknownError
               deriving (Eq, Read, Show)
 
 instance Exception AppErrors 
@@ -44,3 +46,11 @@ instance ErrStatus AppErrors where
   toErrStatus :: AppErrors -> Status
   toErrStatus MissingContent = status404
   toErrStatus ContentLoadFailure = status400
+
+instance (ToMarkup (OpenUnion es), ToMarkup a) => ToMarkup (Envelope es a) where
+  toMarkup :: Envelope es a -> Markup
+  toMarkup (ErrEnvelope es) = toMarkup es
+  toMarkup (SuccEnvelope a) = toMarkup a
+
+instance ToMarkup (OpenUnion '[AppErrors]) where
+  toMarkup someErrors = toMarkup $ openUnion (const UnknownError) id someErrors

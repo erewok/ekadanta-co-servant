@@ -31,6 +31,9 @@ spec :: Spec
 spec = around_ withElasticsearch $ do
   ctx <- runIO makeCtx
   with (pure $ ekadantaApp ctx) $ do
+    describe "GET /home" $
+      it "should have all the /home sections" $
+        get "/" `shouldRespondWith` 200
     describe "GET /posts" $
       it "should return post-list rendered" $
         get "/posts" `shouldRespondWith` 200
@@ -48,6 +51,11 @@ spec = around_ withElasticsearch $ do
         get (encodeUtf8 $ "/posts/" <> UUID.toText UUID.nil) `shouldRespondWith` 404
       it "should return a specific post" $
         get ("/posts/4102f030-a81c-44fa-9a7e-5ddc247297a7") `shouldRespondWith` 200
+    describe "GET /projects/<uid>" $ do
+      it "should throw 404 when it can't parse the result" $
+        get (encodeUtf8 $ "/projects/" <> UUID.toText UUID.nil) `shouldRespondWith` 404
+      it "should return a specific post" $
+        get ("/projects/4102f030-a81c-44fa-9a7e-5ddc247297a7") `shouldRespondWith` 200
 
 
 -- | Test environment preparation functions
@@ -92,7 +100,7 @@ getESDocument :: UUID.UUID -> Handler Value
 getESDocument uid = 
   if uid == UUID.nil -- This is how we single a failing result...
     then pure . Object $ HM.fromList [("bad", String "data")]
-    else pure defaultPostSource
+    else pure $ Object $ HM.fromList [("_source", defaultPostSource)]
   
 defaultPostSource :: Value
 defaultPostSource = 
@@ -106,7 +114,7 @@ defaultPostSource =
     , _title = "Post Title"
     , _lede = "Some posts have some teaser text"
     , _tags = ["testing", "defaults", "elasticsearch"]
-    , _pid = UUID.toText $ UUID.nil
+    , _pid = "4102f030-a81c-44fa-9a7e-5ddc247297a7"
   }
 
 

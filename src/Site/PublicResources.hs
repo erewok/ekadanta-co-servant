@@ -22,6 +22,7 @@ import           Servant
 import           Servant.Client
 import           Servant.Server
 import           Servant.HTML.Blaze
+import qualified Servant.Checked.Exceptions as SCE
 import           Text.Blaze                  (ToMarkup(..), Markup, text)
 import           Text.Blaze.Html             ( Html )
 
@@ -40,8 +41,8 @@ type PublicApi =
   :<|> "projects" :> Get '[HTML] Html
   :<|> "posts" :> Capture "pgNum" Int :> Get '[HTML] Html
   :<|> "projects" :> Capture "pgNum" Int :> Get '[HTML] Html
-  :<|> "posts" :> Capture "post_id" UUID.UUID :> Get '[HTML] Html
-  :<|> "projects" :> Capture "post_id" UUID.UUID :> Get '[HTML] Html
+  :<|> "posts" :> Capture "post_id" UUID.UUID :> SCE.Throws AppErrors :> Get '[HTML] Html
+  :<|> "projects" :> Capture "post_id" UUID.UUID :> SCE.Throws AppErrors :> Get '[HTML] Html
   :<|> "search" :> ReqBody '[FormUrlEncoded] SearchForm :> Post '[HTML] Html
   :<|> "about" :> Get '[HTML] Html
   :<|> "contact" :>  Get '[HTML] Html
@@ -91,13 +92,13 @@ searchContentListProcessor pgNum searchResult rt =
       pure $ contentListPage (pageCount, pgNum) rt tagList resources
 
 -- | Get a particular post by its uid
-getResourceH :: UUID.UUID -> EkadantaApp Html
+getResourceH :: UUID.UUID -> EkadantaApp (SCE.Envelope '[AppErrors] Html)
 getResourceH uid = do
   config     <- asks _getConfig
   resourcesResp  <- liftIO $ getDocument config uid
   case resourcesResp of
-    Left err -> throwM MissingContent
-    Right resource -> pure $ contentDetailPage resource
+    Left err -> SCE.pureErrEnvelope MissingContent
+    Right resource -> SCE.pureSuccEnvelope $ contentDetailPage resource
 
 
 -- | Post search results from a text input
