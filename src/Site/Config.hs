@@ -45,10 +45,13 @@ data SiteConfig = SiteConfig {
   , esPort        :: !Text
   , emailUsername :: !Text
   , emailPasswd   :: !Text
+  , adminUsername :: !Text
+  , adminPasswd   :: !Text
+  , adminName     :: !Text
 } deriving (Generic, Show)
 
 instance DefConfig SiteConfig where
-  defConfig = SiteConfig Prod "test-version" "http://localhost" "9200" "user" "password"
+  defConfig = SiteConfig Prod "test-version" "http://localhost" "9200" "user" "password" "admin" "admin-password" "me"
 
 instance FromEnv SiteConfig
 

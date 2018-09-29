@@ -147,6 +147,22 @@ searchPaginatingQ rt (Just count) offset = Object $ HM.fromList [
   , ("aggs", Object $ HM.fromList [ ("tags", tagsAgg), ("counts", docTypeCount) ] )
   ]
 
+matchAllQ :: PageCount -> Offset -> Value
+matchAllQ Nothing offset = Object $ HM.fromList [
+  ( "from", toJSON offset )
+  , ( "size", toJSON _DEFAULT_PAGE_COUNT )
+  , ( "query", Object $ HM.fromList [("match_all", Object $ HM.fromList [])] )
+  , ( "sort", pubDateDescSort ) 
+  , ("aggs", Object $ HM.fromList [ ("tags", tagsAgg), ("counts", docTypeCount) ] )
+  ]
+matchAllQ (Just count) offset = Object $ HM.fromList [
+  ( "from", toJSON offset )
+  , ( "size", toJSON count )
+  , ( "query", Object $ HM.fromList [("match_all", Object $ HM.fromList [])] )
+  , ( "sort", pubDateDescSort ) 
+  , ("aggs", Object $ HM.fromList [ ("tags", tagsAgg), ("counts", docTypeCount) ] )
+  ]
+
 resourceTypeTerm :: ResourceType -> Value
 resourceTypeTerm rt = Object $ HM.fromList [ ( "term", Object $ HM.fromList [( "_resourceType", String . T.pack . show $ rt )] )]
 

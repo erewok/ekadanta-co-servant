@@ -11,6 +11,7 @@ import           RIO                       hiding ( Handler )
 import qualified RIO.HashMap                   as HM
 import qualified RIO.Vector                    as V
 import           Servant
+import           Servant.Server
 import           System.Log.FastLogger            ( newStdoutLoggerSet 
                                                   , defaultBufSize
                                                   , pushLogStrLn
@@ -30,7 +31,7 @@ import           Site.Types
 spec :: Spec
 spec = around_ withElasticsearch $ do
   ctx <- runIO makeCtx
-  with (pure $ ekadantaApp ctx) $ do
+  with (pure $ publicApp ctx) $ do
     describe "GET /home" $
       it "should have all the /home sections" $
         get "/" `shouldRespondWith` 200
@@ -70,6 +71,13 @@ makeCtx = do
   }
   logset <- newStdoutLoggerSet defaultBufSize
   pure EkadantaCtx { _getLogger = logset, _getConfig = realConfig }
+
+
+publicApp :: EkadantaCtx -> Application
+publicApp ctx = 
+  serve (Proxy :: Proxy PublicApi) $ 
+    hoistServer (Proxy :: Proxy PublicApi) (runRIO ctx) publicHandlers
+
 
 -- | We stub out the Elasticsearch server so we can test behaviors
 withElasticsearch :: IO () -> IO ()

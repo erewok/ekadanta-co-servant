@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 9406a8b860a66da9ae8241e3866b3a317d4b05e0477b2af44fe9059a6412c0b9
+-- hash: b671081ca90d406799c732f3abce15bc33d739972075903855055c1068b25df5
 
 name:           ekadanta-co
 version:        0.1.0.0
@@ -66,6 +66,7 @@ library
     , mime-mail
     , rio
     , servant
+    , servant-auth-server
     , servant-blaze
     , servant-checked-exceptions
     , servant-client
@@ -107,6 +108,7 @@ executable ekadanta-co
     , mime-mail
     , rio
     , servant
+    , servant-auth-server
     , servant-blaze
     , servant-checked-exceptions
     , servant-client
@@ -155,6 +157,7 @@ test-suite ekadanta-co-test
     , mime-mail
     , rio
     , servant
+    , servant-auth-server
     , servant-blaze
     , servant-checked-exceptions
     , servant-client

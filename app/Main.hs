@@ -11,6 +11,9 @@ import qualified Network.Wai.Handler.Warp           as Warp
 import           Prelude                               ( print )
 import           RIO
 import           Servant.Checked.Exceptions.Internal.Servant.API (ErrStatus(toErrStatus))
+import           Servant
+import           Servant.Auth.Server
+import           Servant.Auth.Server.SetCookieOrphan ()
 import           System.Envy
 import           System.Log.FastLogger                 ( newStdoutLoggerSet 
                                                        , defaultBufSize
@@ -38,6 +41,7 @@ main = do
   appLogger <- newStdoutLoggerSet defaultBufSize
 
   tstamp <- getCurrentTime
+  myKey <- generateKey
 
   let lgmsg = LogMessage {
     message = "Ekadanta App Starting up"
@@ -54,5 +58,10 @@ main = do
       portSettings = Warp.setPort 8000 warpSettings
       timeoutSettings = Warp.setTimeout 55 portSettings
       settings = Warp.setOnExceptionResponse errorMaker timeoutSettings
+      jwtCfg = defaultJWTSettings myKey
+      cookieCfg = if environment config == Local 
+                  then defaultCookieSettings{cookieIsSecure=Servant.Auth.Server.NotSecure}
+                  else defaultCookieSettings
+      cfg = cookieCfg :. jwtCfg :. EmptyContext
 
-  Warp.runSettings settings $ logger $ ekadantaApp ctx
+  Warp.runSettings settings $ logger $ ekadantaApp cfg cookieCfg jwtCfg ctx

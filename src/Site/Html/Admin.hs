@@ -1,17 +1,22 @@
 module Site.Html.Admin (
   adminEditListPage
   , adminEditDetailPage
+  , adminLoginPage
+  , redirectPage
+  , LoginForm(..)
 ) where
 
 import qualified Data.Text                   as T
 import           RIO
-import           Text.Blaze.Html             ( Html )
-import           Text.Blaze.Html5            ( (!), Attribute )
+import           Text.Blaze.Html                ( Html )
+import           Text.Blaze.Html5               ( (!), Attribute )
 import qualified Text.Blaze.Html5            as H
 import qualified Text.Blaze.Html5.Attributes as A
+import           Web.FormUrlEncoded             (Form(..)
+                                                , FromForm(..))
 
 import qualified Site.Html.Base              as Base
-import           Site.Html.ContentList       ( renderPaginator )
+import           Site.Html.ContentList          ( renderPaginator )
 import           Site.Types
 
 
@@ -21,6 +26,19 @@ adminEditListPage pgNum content = Base.pageSkeleton $ contentEditList pgNum cont
 adminEditDetailPage :: Maybe Resource -> Html
 adminEditDetailPage item = Base.pageSkeleton $ contentEditDetail item
 
+adminLoginPage :: Html
+adminLoginPage = Base.pageSkeleton $ loginForm
+
+redirectPage :: String -> H.Html
+redirectPage uri = H.docTypeHtml $ do
+  H.head $ do
+    H.title "redirecting..."
+    H.meta ! A.httpEquiv "refresh" ! A.content (H.toValue $ "1; url=" ++ uri)
+  H.body $ do
+    H.p "You are being redirected."
+    H.p $ do
+      void "If your browser does not refresh the page click "
+  H.a ! A.href (H.toValue uri) $ "here"
 
 -- | Content Edit List: Show all Resources for editing
 contentEditList :: PageNum -> [Resource] -> Html
@@ -217,3 +235,20 @@ updateContentItem item = do
       ! A.value (H.toValue . T.intercalate ", " $ item ^. tags)
 
     H.input ! A.class_ "button-primary" ! A.type_ "submit" !  A.value "Send"
+
+
+-- | Login Form and Renderings
+
+data LoginForm = LoginForm { username :: Text, password :: Text }
+   deriving (Eq, Show, Read, Generic)
+
+instance FromForm LoginForm
+
+
+loginForm :: Html
+loginForm = 
+  H.section ! A.id "login" ! A.class_ "container login u-full-width u-max-full-width" $
+    H.form ! A.method "post" ! A.action "/login" $ do
+      H.input ! A.class_ "u-full-width" ! A.type_ "text" ! A.name "username" ! A.placeholder "Name" ! A.id "nameInput"
+      H.input ! A.class_ "u-full-width" ! A.type_ "text" !  A.name "password" ! A.placeholder "Password" ! A.id "emailInput"
+      H.input ! A.class_ "button u-pull-right" ! A.type_ "submit" ! A.value "Submit"

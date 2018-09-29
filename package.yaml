@@ -38,6 +38,7 @@ dependencies:
 - mime-mail
 - rio
 - servant
+- servant-auth-server
 - servant-blaze
 - servant-checked-exceptions
 - servant-client

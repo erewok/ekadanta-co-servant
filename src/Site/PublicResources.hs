@@ -1,20 +1,12 @@
-{-# LANGUAGE FlexibleContexts     #-}
-{-# LANGUAGE FlexibleInstances    #-}
-{-# LANGUAGE TypeSynonymInstances #-}
-{-# LANGUAGE UndecidableInstances #-}
-
 module Site.PublicResources where
 
 import           Control.Lens
 import           Data.Aeson
 import           Data.Aeson.Lens
 import           Data.Aeson.Types
-import           Data.ByteString.Lazy        ( fromStrict )
 import           Data.Maybe
 import qualified Data.Text                as T
-import           Data.Text.Encoding          ( encodeUtf8 )
 import qualified Data.UUID                as UUID
-import           Network.HTTP.Types          (Status, status400, status404)
 import           RIO                  hiding ( Handler )
 import           RIO.List                    ( headMaybe )
 import qualified RIO.HashMap              as HM
@@ -23,7 +15,6 @@ import           Servant.Client
 import           Servant.Server
 import           Servant.HTML.Blaze
 import qualified Servant.Checked.Exceptions as SCE
-import           Text.Blaze                  (ToMarkup(..), Markup, text)
 import           Text.Blaze.Html             ( Html )
 
 import           Site.Config
@@ -37,10 +28,10 @@ import           Site.Html.ContentList
 
 
 type PublicApi = 
-  "posts" :> Get '[HTML] Html
-  :<|> "projects" :> Get '[HTML] Html
-  :<|> "posts" :> Capture "pgNum" Int :> Get '[HTML] Html
-  :<|> "projects" :> Capture "pgNum" Int :> Get '[HTML] Html
+  "posts" :> SCE.Throws AppErrors :> Get '[HTML] Html
+  :<|> "projects" :> SCE.Throws AppErrors :> Get '[HTML] Html
+  :<|> "posts" :> Capture "pgNum" Int :> SCE.Throws AppErrors :> Get '[HTML] Html
+  :<|> "projects" :> Capture "pgNum" Int :> SCE.Throws AppErrors :> Get '[HTML] Html
   :<|> "posts" :> Capture "post_id" UUID.UUID :> SCE.Throws AppErrors :> Get '[HTML] Html
   :<|> "projects" :> Capture "post_id" UUID.UUID :> SCE.Throws AppErrors :> Get '[HTML] Html
   :<|> "search" :> ReqBody '[FormUrlEncoded] SearchForm :> Post '[HTML] Html
@@ -48,10 +39,7 @@ type PublicApi =
   :<|> "contact" :>  Get '[HTML] Html
   :<|> "contact" :> ReqBody '[FormUrlEncoded] ContactForm :> Post '[HTML] Html
   :<|> Get '[HTML] Html
-  :<|> "static" :> Raw
-
-publicApi :: Proxy PublicApi
-publicApi = Proxy
+  
 
 publicHandlers :: ServerT PublicApi EkadantaApp
 publicHandlers =
@@ -66,17 +54,17 @@ publicHandlers =
   :<|> contactGetH
   :<|> contactPostH
   :<|> homeH
-  :<|> serveDirectoryFileServer "static"
+
 
 -- | Generic retrieval handler that will lookup content and return Detail Page for it
-getPaginatedContent :: ResourceType -> Int -> EkadantaApp Html
+getPaginatedContent :: ResourceType -> Int -> EkadantaApp (SCE.Envelope '[AppErrors] Html)
 getPaginatedContent rt pgNum = do
   let query = searchPaginatingQ rt Nothing $ (pgNum - 1) * _DEFAULT_PAGE_COUNT
   config     <- asks _getConfig
   resourcesResp  <- liftIO $ searchContent config query
   case searchContentListProcessor pgNum resourcesResp rt of
-    Left err -> throwM ContentLoadFailure
-    Right render -> pure render
+    Left err ->  SCE.pureErrEnvelope ContentLoadFailure
+    Right render -> SCE.pureSuccEnvelope $ render
 
 searchContentListProcessor :: Int -> Either ServantError Value -> ResourceType -> Either T.Text Html
 searchContentListProcessor pgNum searchResult rt =
