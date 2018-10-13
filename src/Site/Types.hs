@@ -62,16 +62,17 @@ data ResourceType = BlogPost
 
 parseResourceType :: T.Text -> Either T.Text ResourceType
 parseResourceType val
-  | val == "BlogPost" = Right BlogPost
-  | val == "About"    = Right About
-  | val == "Project"  = Right Project
-  | otherwise         = Left ("Not a ResourceType: " <> val)
+  | lowVal == "blogpost" = Right BlogPost
+  | lowVal == "about"    = Right About
+  | lowVal == "project"  = Right Project
+  | otherwise            = Left ("Not a ResourceType: " <> val)
+  where lowVal = T.toLower val
 
 instance FromJSON ResourceType
 instance ToJSON ResourceType
 
 instance ToForm ResourceType where
-  toForm rt = fromList [ (T.pack "_resourceType", T.pack . show $ rt) ]
+  toForm rt = fromList [ (T.pack "_resourceType", T.toLower . T.pack . show $ rt) ]
 
 instance FromHttpApiData ResourceType where
   parseUrlPiece = parseResourceType
@@ -88,14 +89,14 @@ data ContentEncoding = ContentMarkdown
                       deriving (Eq, Show, Generic, Read)
 
 instance ToForm ContentEncoding where
-  toForm ce = fromList [ (T.pack "_contentEncoding", T.pack . show $ ce) ]
+  toForm ce = fromList [ (T.pack "_contentEncoding", T.toLower . T.pack . show $ ce) ]
 
 parseContentEncoding :: T.Text -> Either T.Text ContentEncoding
 parseContentEncoding val
-  | val == "ContentMarkdown" = Right ContentMarkdown
-  | val == "ContentHtml"    = Right ContentHtml
-  | otherwise         = Left ("Not a ContentEncoding: " <> val)
-
+  | lowValEndHas  "markdown" = Right ContentMarkdown
+  | lowValEndHas  "html"     = Right ContentHtml
+  | otherwise                   = Left ("Not a ContentEncoding: " <> val)
+  where lowValEndHas suff = T.isSuffixOf suff $ T.toLower val
 
 instance FromHttpApiData ContentEncoding where
   parseUrlPiece = parseContentEncoding

@@ -4,6 +4,7 @@ import           Control.Lens
 import           Data.Aeson
 import           Data.Aeson.Lens
 import           Data.Aeson.Types
+import           Data.ByteString.Lazy     ( fromStrict )
 import           Data.Maybe
 import qualified Data.Text                as T
 import qualified Data.UUID                as UUID
@@ -37,25 +38,34 @@ type AdminApi =
   "admin" :> Get '[HTML] Html
     :<|> "admin" :> Capture "pgNum" Int :> Get '[HTML] Html
     :<|> "admin" :> "item" :> Get '[HTML] Html
+    :<|> "admin" :> "item" :> ReqBody '[FormUrlEncoded] Resource :> Post '[HTML] Html
     :<|> "admin" :> "item" :> Capture "item_id" UUID.UUID :> Get '[HTML] Html 
+    :<|> "admin" :> "item" :> Capture "item_id" UUID.UUID :> ReqBody '[FormUrlEncoded] Resource :> Post '[HTML] Html
 
 adminHandlers :: AuthResult AdminUser -> ServerT AdminApi EkadantaApp
 adminHandlers (Servant.Auth.Server.Authenticated user) =
   adminListItemsPaginatedH 1
   :<|> adminListItemsPaginatedH
-  :<|> adminCreateItemH
-  :<|> adminUpdateItemH
+  :<|> adminCreateItemGetH
+  :<|> adminCreateItemPostH
+  :<|> adminUpdateItemGetH
+  :<|> adminUpdateItemPostH
 adminHandlers _ = 
   noAuthH
   :<|> noAuthArgH
   :<|> noAuthH
   :<|> noAuthArgH
+  :<|> noAuthArgH
+  :<|> noAuthArgArgH
 
 noAuthH :: EkadantaApp Html
 noAuthH = throwM err401
 
 noAuthArgH :: forall a. a -> EkadantaApp Html
 noAuthArgH _ = throwM err401
+
+noAuthArgArgH :: forall a b. a -> b -> EkadantaApp Html
+noAuthArgArgH _ _ = throwM err401
 
 -- | Paginated admin edit list
 adminListItemsPaginatedH :: Int -> EkadantaApp Html
@@ -69,25 +79,51 @@ adminListItemsPaginatedH pgNum = do
       let resources = pullHitsResources result
           resourceTotals = pullAggsKey "counts" result
           postTotal =  getKeyCount (T.pack . show $ BlogPost) resourceTotals
-          pageCount = if isJust postTotal then fromJust postTotal else 0
+          pageCount = fromMaybe 0 postTotal
           tagCounts = pullAggsKey "tags" result
           tagList = tagCounts ^.. folded . traverse . (_Object . ix "key" . _String)
       pure $ adminEditListPage (pageCount, pgNum) resources
 
 
 -- | Create a new item
-adminCreateItemH :: EkadantaApp Html
-adminCreateItemH = pure $ adminEditDetailPage Nothing
+adminCreateItemGetH :: EkadantaApp Html
+adminCreateItemGetH = pure $ adminEditDetailPage Nothing
+
+adminCreateItemPostH :: Resource -> EkadantaApp Html
+adminCreateItemPostH item = do
+  config <- asks _getConfig
+  result <- liftIO $ indexContent config Nothing item
+  case result of
+    Left err -> throwM $ getServantErrBody err
+    Right result -> pure $ redirectPage "/admin"
 
 
 -- | Edit a particular item by its uid
-adminUpdateItemH :: UUID.UUID -> EkadantaApp Html
-adminUpdateItemH uid = do
+adminUpdateItemGetH :: UUID.UUID -> EkadantaApp Html
+adminUpdateItemGetH uid = do
   config     <- asks _getConfig
   resourcesResp  <- liftIO $ getDocument config uid
   case resourcesResp of
     Left err -> throwM MissingContent
     Right resource -> pure $ adminEditDetailPage (Just resource)
+
+
+adminUpdateItemPostH :: UUID.UUID -> Resource -> EkadantaApp Html
+adminUpdateItemPostH uid item = do
+  config <- asks _getConfig
+  result <- liftIO $ indexContent config (Just uid) item
+  case result of
+    Left err -> throwM $ getServantErrBody err
+    Right result -> pure $ redirectPage "/admin"
+    
+
+getServantErrBody :: ServantError -> ServantErr
+getServantErrBody (ConnectionError connE) = err500 { errBody = "connection error" }
+getServantErrBody (FailureResponse rb) =  err500 { errBody = responseBody rb}
+getServantErrBody (DecodeFailure rct rb) =  err500 { errBody = responseBody rb }
+getServantErrBody (UnsupportedContentType rct rb) =  err500 { errBody = responseBody rb}
+getServantErrBody (InvalidContentTypeHeader rct ) =  err500 { errBody = "invalid content-type" }
+
 
 
 -- | Login APIs
@@ -117,7 +153,6 @@ loginPostH cookieSettings jwtSettings form = do
       case mApplyCookies of
         Nothing           -> throwM err401
         Just applyCookies -> return $ applyCookies $ redirectPage "/admin"
-loginPostH _ _ _ = throwM err401
 
 validateLogin :: SiteConfig -> LoginForm -> Maybe AdminUser
 validateLogin config (LoginForm uname passwd ) = 

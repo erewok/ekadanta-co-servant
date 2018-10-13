@@ -64,7 +64,7 @@ siteWideHead =
     H.link ! A.href "/static/css/skeleton.css" ! A.rel "stylesheet" ! A.type_ "text/css"
     H.link ! A.href "/static/highlight/styles/default.css" ! A.rel "stylesheet" ! A.type_ "text/css"
     H.link ! A.href "/static/css/styles.css" ! A.rel "stylesheet" ! A.type_ "text/css"
-    H.script ! A.type_ "text/javascript" ! A.src "static/highlight/highlight.pack.js" $ ""
+    H.script ! A.type_ "text/javascript" ! A.src "/static/highlight/highlight.pack.js" $ ""
 
 
 siteWideFooter :: Html
@@ -77,6 +77,7 @@ siteWideFooter =
     H.p ! A.class_ "footer-footenote" $ do
       void "This site is "
       H.a ! A.href "https://gitlab.com/erewok/ekadanta-co-servant" ! A.target "_blank" $ "open source"
+    H.script ! A.type_ "text/javascript" $ "hljs.initHighlightingOnLoad();"
     H.script $ H.text googAnalytics
     
 

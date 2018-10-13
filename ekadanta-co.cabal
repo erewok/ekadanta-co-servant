@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: b671081ca90d406799c732f3abce15bc33d739972075903855055c1068b25df5
+-- hash: 9b28071a724700b0bf2e944e2d43b4a8574a6200f297194bf0e6fcafcef26471
 
 name:           ekadanta-co
 version:        0.1.0.0
@@ -55,6 +55,7 @@ library
     , blaze-markup
     , bytestring
     , cmark
+    , cmark-gfm
     , data-default
     , envy
     , fast-logger
@@ -96,6 +97,7 @@ executable ekadanta-co
     , blaze-markup
     , bytestring
     , cmark
+    , cmark-gfm
     , data-default
     , ekadanta-co
     , envy
@@ -142,6 +144,7 @@ test-suite ekadanta-co-test
     , blaze-markup
     , bytestring
     , cmark
+    , cmark-gfm
     , data-default
     , ekadanta-co
     , envy

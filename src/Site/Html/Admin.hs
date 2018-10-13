@@ -7,6 +7,7 @@ module Site.Html.Admin (
 ) where
 
 import qualified Data.Text                   as T
+import qualified Data.UUID                   as UUID
 import           RIO
 import           Text.Blaze.Html                ( Html )
 import           Text.Blaze.Html5               ( (!), Attribute )
@@ -68,7 +69,7 @@ renderTableHead =
 renderTableRow :: Resource -> Html
 renderTableRow item = 
   H.tr $ do
-    H.td $ H.a ! A.href (H.toValue (item ^. pid)) $ H.toMarkup (item ^. pid)
+    H.td $ H.a ! A.href (H.toValue ("/admin/item/" <> (item ^. pid))) $ H.toMarkup (item ^. pid)
     H.td $ H.toMarkup $ show (item ^. resourceType)
     H.td $ H.toMarkup $ show (item ^. contentEncoding)
     H.td $ renderPublishedCheck (item ^. published)
@@ -87,7 +88,7 @@ renderTagList = H.toMarkup . (T.intercalate ", ")
 
 renderFeaturedImg :: Maybe Text -> Html
 renderFeaturedImg Nothing = ""
-renderFeaturedImg (Just img) = H.img ! A.src (H.toValue img)
+renderFeaturedImg (Just img) = H.img ! A.src (H.toValue img) ! A.width "100px"
 
 
 -- | Content Edit Detail: Edit a particular item
@@ -105,29 +106,26 @@ newContentItemForm = do
     H.div ! A.class_ "row" $ do
       H.div ! A.class_ "two columns" $ do
         H.label ! A.for "pid" $ "Post ID"
-        H.input ! A.type_ "text" ! A.id "pid" ! A.name "_pid" ! A.readonly "true"
+        H.input ! A.type_ "text" ! A.id "pid" ! A.name "_pid" ! A.readonly "true" ! A.value (H.toValue . UUID.toText $ UUID.nil)
       
-      H.div ! A.class_ "two columns" $
-        H.label ! A.for "published" $ do
-          "Post ID"
-          H.input ! A.type_ "checkbox" ! A.id "published" ! A.name "_published"
-          H.span ! A.class_ "label-body" $ "Publish?"
+      H.div ! A.class_ "two columns" ! A.class_ "publishedCheck" $ do
+        H.label ! A.for "published" $ "Published"
+        H.select ! A.class_ "u-fill-width" ! A.class_ "published" ! A.name "_published" $ do
+          H.option ! A.value "True" $ "Yes"
+          H.option ! A.value "False" $ "No"
 
       H.div ! A.class_ "two columns" $ do
         H.label ! A.for "resourceType" $ "Resource Type"
-        H.select ! A.class_ "u-fill-width" ! A.class_ "resourceType" $ do
-          H.select ! A.class_ "u-full-width" ! A.id "resourceType" ! A.name "_resourceType" $ do
-            H.option ! A.value "blogpost" $ "BlogPost"
-            H.option ! A.value "project" $ "Project"
-            H.option ! A.value "about" $ "About"
+        H.select ! A.class_ "u-fill-width" ! A.class_ "resourceType" ! A.name "_resourceType" $ do
+          H.option ! A.value "blogpost" $ "BlogPost"
+          H.option ! A.value "project" $ "Project"
+          H.option ! A.value "about" $ "About"
 
       H.div ! A.class_ "two columns" $ do
         H.label ! A.for "contentEncoding" $ "Resource Type"
-        H.select ! A.class_ "u-fill-width" ! A.class_ "contentEncoding" $ do
-          H.select ! A.class_ "u-full-width" 
-            ! A.id "contentEncoding" ! A.name "_contentEncoding" $ do
-              H.option ! A.value "html" $ "Html"
-              H.option ! A.value "markdown" $ "Markdown"
+        H.select ! A.class_ "u-fill-width" ! A.class_ "contentEncoding" ! A.name "_contentEncoding" $ do
+          H.option ! A.value "html" $ "Html"
+          H.option ! A.value "markdown" $ "Markdown"
 
       H.div ! A.class_ "two columns" $ do
         H.label ! A.for "pubdate" $ "Publication Date"
@@ -146,13 +144,13 @@ newContentItemForm = do
 
     H.label ! A.for "lede" $ "Lede"
     H.textarea 
-      ! A.id "lede" ! A.name "_lede" 
+      ! A.id "lede" ! A.name "_lede" ! A.rows "30"
       ! A.placeholder "Lede" ! A.class_ "u-full-width" 
       $ ""
 
     H.label ! A.for "body" $ "Body"
     H.textarea 
-      ! A.id "body" ! A.name "_body" 
+      ! A.id "body" ! A.name "_body" ! A.rows "60"
       ! A.placeholder "body" ! A.class_ "u-full-width"
       $ ""
       
@@ -169,34 +167,30 @@ updateContentItem item = do
   H.div ! A.class_ "edit-head" $
     H.h1 $ (H.toMarkup $ item ^. pid) <> (H.toMarkup . show $ item ^. resourceType)
 
-  H.form ! A.method "post" ! A.action "/admin/item" $ do
+  H.form ! A.method "post" ! A.action (H.toValue ("/admin/item/" <> (item ^. pid))) $ do
     H.div ! A.class_ "row" $ do
       H.div ! A.class_ "two columns" $ do
         H.label ! A.for "pid" $ "Post ID"
         H.input ! A.type_ "text" ! A.id "pid" ! A.name "_pid" ! A.readonly "true" ! A.value (H.toValue $ item ^. pid)
       
-      H.div ! A.class_ "two columns" $
-        H.label ! A.for "published" $ do
-          "Post ID"
-          H.input ! A.type_ "checkbox" ! A.id "published" ! A.name "_published" ! A.value (H.toValue $ item ^. published)
-          H.span ! A.class_ "label-body" $ "Publish?"
+      H.div ! A.class_ "two columns" ! A.class_ "publishedCheck" $ do
+        H.label ! A.for "published" $ "Published"
+        H.select ! A.class_ "u-fill-width" ! A.class_ "published" ! A.name "_published" $ do
+          H.option ! A.value "True" $ "Yes"
+          H.option ! A.value "False" $ "No"
 
       H.div ! A.class_ "two columns" $ do
         H.label ! A.for "resourceType" $ "Resource Type"
-        H.select ! A.class_ "u-fill-width" ! A.class_ "resourceType" $ do
-          H.select ! A.class_ "u-full-width" ! A.id "resourceType" ! A.name "_resourceType" ! A.value (H.toValue . show $ item ^. resourceType) $ do
-            H.option ! A.value "blogpost" $ "BlogPost"
-            H.option ! A.value "project" $ "Project"
-            H.option ! A.value "about" $ "About"
+        H.select ! A.class_ "u-fill-width" ! A.class_ "resourceType" ! A.name "_resourceType" $ do
+          H.option ! A.value "blogpost" $ "BlogPost"
+          H.option ! A.value "project" $ "Project"
+          H.option ! A.value "about" $ "About"
 
       H.div ! A.class_ "two columns" $ do
         H.label ! A.for "contentEncoding" $ "Resource Type"
-        H.select ! A.class_ "u-fill-width" ! A.class_ "contentEncoding" $ do
-          H.select ! A.class_ "u-full-width" 
-            ! A.id "contentEncoding" ! A.name "_contentEncoding" 
-            ! A.value (H.toValue . show $ item ^. contentEncoding) $ do
-              H.option ! A.value "html" $ "Html"
-              H.option ! A.value "markdown" $ "Markdown"
+        H.select ! A.class_ "u-fill-width" ! A.class_ "contentEncoding" ! A.name "_contentEncoding" $ do
+          H.option ! A.value "html" $ "Html"
+          H.option ! A.value "markdown" $ "Markdown"
 
       H.div ! A.class_ "two columns" $ do
         H.label ! A.for "pubdate" $ "Publication Date"
@@ -218,13 +212,13 @@ updateContentItem item = do
 
     H.label ! A.for "lede" $ "Lede"
     H.textarea 
-      ! A.id "lede" ! A.name "_lede" 
+      ! A.id "lede" ! A.name "_lede" ! A.rows "30"
       ! A.placeholder "Lede" ! A.class_ "u-full-width" $ 
         H.toMarkup $ item ^. lede
 
     H.label ! A.for "body" $ "Body"
     H.textarea 
-      ! A.id "body" ! A.name "_body" 
+      ! A.id "body" ! A.name "_body" ! A.rows "60"
       ! A.placeholder "body" ! A.class_ "u-full-width" $ 
         H.toMarkup $ item ^. body
 

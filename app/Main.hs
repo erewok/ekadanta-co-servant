@@ -28,7 +28,7 @@ errorMaker :: SomeException -> Wai.Response
 errorMaker someErr = 
   case (cast someErr :: Maybe AppErrors) of
     Just myError -> Wai.responseLBS (toErrStatus myError) [(hContentType, "application/json")] $ encode myError
-    Nothing -> Wai.responseLBS internalServerError500 [(hContentType, "application/json")] $ "{\"status\": \"failed\", \"error\": \"" <> (LBS.pack $ show someErr) <> "\"}"
+    Nothing -> Wai.responseLBS internalServerError500 [(hContentType, "application/json")] $ "{\"status\": \"failed\", \"error\": \"" <> (encode $ show someErr) <> "\"}"
 
 
 main :: IO ()
@@ -60,8 +60,8 @@ main = do
       settings = Warp.setOnExceptionResponse errorMaker timeoutSettings
       jwtCfg = defaultJWTSettings myKey
       cookieCfg = if environment config == Local 
-                  then defaultCookieSettings{cookieIsSecure=Servant.Auth.Server.NotSecure}
-                  else defaultCookieSettings
+                  then defaultCookieSettings{cookieIsSecure=NotSecure, cookieXsrfSetting = Nothing}
+                  else defaultCookieSettings{cookieXsrfSetting = Nothing}
       cfg = cookieCfg :. jwtCfg :. EmptyContext
 
   Warp.runSettings settings $ logger $ ekadantaApp cfg cookieCfg jwtCfg ctx

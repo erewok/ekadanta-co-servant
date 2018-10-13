@@ -27,6 +27,7 @@ dependencies:
 - blaze-markup
 - bytestring
 - cmark
+- cmark-gfm
 - data-default
 - envy
 - fast-logger

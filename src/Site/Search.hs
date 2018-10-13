@@ -176,11 +176,15 @@ docTypeCount :: Value
 docTypeCount = Object $ HM.fromList [ ( "terms", Object $ HM.fromList [( "field", String "_resourceType" ), ("size", Number 5) ] )]
 
 -- | Client functions for interacting with our index/documents
-indexContent :: SiteConfig -> Resource -> IO (Either ServantError Value)
-indexContent config item = do
-  uid <- UUID4.nextRandom
+indexContent :: SiteConfig -> Maybe UUID.UUID -> Resource -> IO (Either ServantError Value)
+indexContent config muid item = do
   let indexer = indexDocument mkSearchClient
-  runSearchClient config $ indexer uid item
+  case muid of
+    Just truid -> runSearchClient config $ indexer truid item
+    Nothing -> do
+      nuid <- UUID4.nextRandom
+      let updateItem = item{_pid = UUID.toText nuid}
+      runSearchClient config $ indexer nuid updateItem
 
 getContent :: SiteConfig -> UUID.UUID -> IO (Either ServantError Value)
 getContent config uid = 

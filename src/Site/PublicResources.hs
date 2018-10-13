@@ -64,7 +64,7 @@ getPaginatedContent rt pgNum = do
   resourcesResp  <- liftIO $ searchContent config query
   case searchContentListProcessor pgNum resourcesResp rt of
     Left err ->  SCE.pureErrEnvelope ContentLoadFailure
-    Right render -> SCE.pureSuccEnvelope $ render
+    Right render -> SCE.pureSuccEnvelope render
 
 searchContentListProcessor :: Int -> Either ServantError Value -> ResourceType -> Either T.Text Html
 searchContentListProcessor pgNum searchResult rt =
@@ -74,7 +74,7 @@ searchContentListProcessor pgNum searchResult rt =
       let resources = pullHitsResources result
           resourceTotals = pullAggsKey "counts" result
           postTotal =  getKeyCount (T.pack . show $ rt) resourceTotals
-          pageCount = if isJust postTotal then fromJust postTotal else 0
+          pageCount = fromMaybe 0 postTotal
           tagCounts = pullAggsKey "tags" result
           tagList = tagCounts ^.. folded . traverse . (_Object . ix "key" . _String)
       pure $ contentListPage (pageCount, pgNum) rt tagList resources

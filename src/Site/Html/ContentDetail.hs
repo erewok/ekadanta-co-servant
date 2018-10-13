@@ -2,7 +2,7 @@ module Site.Html.ContentDetail (
   contentDetailPage
 ) where
 
-import qualified CMark                       as Mark
+import qualified CMarkGFM                    as Mark
 import qualified Data.Text                   as T
 import           RIO
 import           Text.Blaze.Html             ( Html )
@@ -66,7 +66,7 @@ renderDetailContent post = do
 renderBodyAsHtmlOrMarkdown :: Types.Resource -> Html
 renderBodyAsHtmlOrMarkdown post =
   if (post ^. Types.contentEncoding) == Types.ContentMarkdown
-    then  H.preEscapedToHtml (Mark.commonmarkToHtml [] $ post ^. Types.body)
+    then  H.preEscapedToHtml (Mark.commonmarkToHtml [Mark.optHardBreaks] [Mark.extStrikethrough] $ post ^. Types.body)
     else H.preEscapedToHtml (post ^. Types.body)
 
 
