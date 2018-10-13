@@ -38,15 +38,9 @@ spec = around_ withElasticsearch $ do
     describe "GET /posts" $
       it "should return post-list rendered" $
         get "/posts" `shouldRespondWith` 200
-    describe "GET /projects" $
-      it "should return project-list rendered" $
-        get "/projects" `shouldRespondWith` 200
     describe "GET /posts/2" $
       it "should return post-list page 2 rendered" $
         get "/posts/1" `shouldRespondWith` 200
-    describe "GET /projects/2" $
-      it "should return post-list page 2 rendered" $
-        get "/projects/2" `shouldRespondWith` 200
     describe "GET /posts/<uid>" $ do
       it "should throw 404 when it can't parse the result" $
         get (encodeUtf8 $ "/posts/" <> UUID.toText UUID.nil) `shouldRespondWith` 404
