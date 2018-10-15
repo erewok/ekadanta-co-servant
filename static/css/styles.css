@@ -564,3 +564,11 @@ Admin Edit List Table
   text-align: center;
 }
 
+form > textarea#lede {
+  min-height: 200px;
+}
+
+form > textarea#body {
+  min-height: 500px;
+}
+
