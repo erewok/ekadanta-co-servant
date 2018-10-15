@@ -45,12 +45,7 @@ spec = around_ withElasticsearch $ do
       it "should throw 404 when it can't parse the result" $
         get (encodeUtf8 $ "/posts/" <> UUID.toText UUID.nil) `shouldRespondWith` 404
       it "should return a specific post" $
-        get ("/posts/4102f030-a81c-44fa-9a7e-5ddc247297a7") `shouldRespondWith` 200
-    describe "GET /projects/<uid>" $ do
-      it "should throw 404 when it can't parse the result" $
-        get (encodeUtf8 $ "/projects/" <> UUID.toText UUID.nil) `shouldRespondWith` 404
-      it "should return a specific post" $
-        get ("/projects/4102f030-a81c-44fa-9a7e-5ddc247297a7") `shouldRespondWith` 200
+        get "/posts/4102f030-a81c-44fa-9a7e-5ddc247297a7" `shouldRespondWith` 200
 
 
 -- | Test environment preparation functions
@@ -95,7 +90,7 @@ searchESIndex (Object hmap) = pure $ Object $ HM.fromList [
     ("hits", Array $ V.fromList [Object $ HM.fromList [("_source", toJSON defaultPostSource)]] )
     ] )
   ]
-searchESIndex _ = pure $ Object $ HM.fromList [("bad", String "data")]  -- This is how we single a failing result
+searchESIndex _ = pure $ Object $ HM.fromList [("bad", String "data")]  -- This is how we signal a failing result
 
 
 getESDocument :: UUID.UUID -> Handler Value
