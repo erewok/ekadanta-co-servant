@@ -1,13 +1,15 @@
 module PublicResourcesSpec where
 
 import qualified Control.Concurrent               as C
+import           Control.DeepSeq
+import           Control.Exception                (evaluate)
 import           Data.Aeson
 import           Data.Aeson.Lens
 import           Data.Text.Encoding               ( encodeUtf8 )
 import qualified Data.UUID                        as UUID
 import           Network.Wai
 import qualified Network.Wai.Handler.Warp         as Warp
-import           RIO                       hiding ( Handler )
+import           RIO                       hiding ( Handler, evaluate )
 import qualified RIO.HashMap                   as HM
 import qualified RIO.Vector                    as V
 import           Servant
@@ -33,19 +35,32 @@ spec = around_ withElasticsearch $ do
   ctx <- runIO makeCtx
   with (pure $ publicApp ctx) $ do
     describe "GET /home" $
-      it "should have all the /home sections" $
-        get "/" `shouldRespondWith` 200
+      it "should have all the /home sections" $ do
+        _ <- get "/" `shouldRespondWith` 200
+        pure ()
+
     describe "GET /posts" $
-      it "should return post-list rendered" $
-        get "/posts" `shouldRespondWith` 200
+      it "should return post-list rendered" $ do
+        _ <- get "/posts" `shouldRespondWith` 200
+        pure ()
     describe "GET /posts/2" $
-      it "should return post-list page 2 rendered" $
-        get "/posts/1" `shouldRespondWith` 200
+      it "should return post-list page 2 rendered" $ do
+        _ <- get "/posts/1" `shouldRespondWith` 200
+        pure ()
     describe "GET /posts/<uid>" $ do
-      it "should throw 404 when it can't parse the result" $
-        get (encodeUtf8 $ "/posts/" <> UUID.toText UUID.nil) `shouldRespondWith` 404
-      it "should return a specific post" $
-        get "/posts/4102f030-a81c-44fa-9a7e-5ddc247297a7" `shouldRespondWith` 200
+      it "should throw 404 when it can't parse the result" $ do
+        _ <- get (encodeUtf8 $ "/posts/" <> UUID.toText UUID.nil) `shouldRespondWith` 404
+        pure ()
+      it "should return a specific post" $ do
+        _ <- get "/posts/4102f030-a81c-44fa-9a7e-5ddc247297a7" `shouldRespondWith` 200
+        pure ()
+    describe "GET /projects/<uid>" $ do
+      it "should throw 404 when it can't parse the result" $ do
+        _ <- get (encodeUtf8 $ "/projects/" <> UUID.toText UUID.nil) `shouldRespondWith` 404
+        pure ()
+      it "should return a specific projects" $ do
+        _ <- get ("/projects/4102f030-a81c-44fa-9a7e-5ddc247297a7") `shouldRespondWith` 200
+        pure ()
 
 
 -- | Test environment preparation functions
@@ -73,7 +88,7 @@ withElasticsearch :: IO () -> IO ()
 withElasticsearch action =
   bracket (liftIO $ C.forkIO $ Warp.run 9999 esTestApp)
     C.killThread
-    (const action)
+    (\_ -> C.threadDelay 500 >> action)
 
 
 esTestApp :: Application

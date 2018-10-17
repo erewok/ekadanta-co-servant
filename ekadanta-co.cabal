@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 9b28071a724700b0bf2e944e2d43b4a8574a6200f297194bf0e6fcafcef26471
+-- hash: fed11044068f28483cf8ef83f69681b5d792ff8a7e9263c891a44d9b1e198ce5
 
 name:           ekadanta-co
 version:        0.1.0.0
@@ -146,6 +146,7 @@ test-suite ekadanta-co-test
     , cmark
     , cmark-gfm
     , data-default
+    , deepseq
     , ekadanta-co
     , envy
     , fast-logger

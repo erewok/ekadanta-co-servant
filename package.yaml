@@ -97,6 +97,7 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - ekadanta-co
+    - deepseq
     - hspec
     - hspec-wai
     - hspec-wai-json
