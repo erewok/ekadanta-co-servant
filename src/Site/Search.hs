@@ -31,7 +31,7 @@ getDocument config uid = do
   resourcesResp <- getContent config uid
   case resourcesResp of
     Left err -> pure . Left $ "Failed looking up content"
-    Right value -> do
+    Right value ->
       case value ^? _Object . ix "_source" of
         Nothing -> pure . Left $ "Failed looking up content"
         Just obj -> pure $ decodeEitherResource obj
