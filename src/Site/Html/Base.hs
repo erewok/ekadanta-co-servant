@@ -63,7 +63,7 @@ siteWideHead =
     H.link ! A.href "/static/css/normalize.css" ! A.rel "stylesheet" ! A.type_ "text/css"
     H.link ! A.href "/static/css/skeleton.css" ! A.rel "stylesheet" ! A.type_ "text/css"
     H.link ! A.href "/static/highlight/styles/default.css" ! A.rel "stylesheet" ! A.type_ "text/css"
-    H.link ! A.href "/static/css/styles.css" ! A.rel "stylesheet" ! A.type_ "text/css"
+    H.link ! A.href "/static/css/styles.min.css" ! A.rel "stylesheet" ! A.type_ "text/css"
     H.script ! A.type_ "text/javascript" ! A.src "/static/highlight/highlight.pack.js" $ ""
 
 

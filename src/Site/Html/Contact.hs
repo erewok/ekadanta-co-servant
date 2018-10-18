@@ -23,7 +23,7 @@ import           Site.Config
 
 contactPage  :: Bool -> Html
 contactPage firstTime = 
-  Base.pageSkeleton $ do
+  Base.pageSkeleton $
     H.div ! A.class_ "row contact-content" $ do
       renderFindMeLeftCol
       renderGetInTouchRightCol firstTime
