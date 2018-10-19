@@ -40,10 +40,9 @@ RUN apt-get update && \
 COPY --from=builder /root/.local/bin/ekadanta-co /opt/ekadanta-co/bin/
 
 RUN adduser --disabled-password --gecos "" ekadanta \
-    && chown -R ekadanta:ekadanta /opt/ekadanta-co \
-    && chmod +x /opt/ekadanta-co/bin/ekadanta-co
+    && chown -R ekadanta:ekadanta /opt/ekadanta-co
 
 USER ekadanta
 EXPOSE 8000
 
-CMD ["/opt/ekadanta-co/bin"]
+CMD ["/opt/ekadanta-co/bin/ekadanta-co"]
