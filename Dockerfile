@@ -39,6 +39,10 @@ RUN apt-get update && \
 
 COPY --from=builder /root/.local/bin/ekadanta-co /opt/ekadanta-co/bin/
 
+WORKDIR /opt/ekadanta-co/
+
+COPY static ./static
+
 RUN adduser --disabled-password --gecos "" ekadanta \
     && chown -R ekadanta:ekadanta /opt/ekadanta-co
 
