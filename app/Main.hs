@@ -60,8 +60,10 @@ main = do
       settings = Warp.setOnExceptionResponse errorMaker timeoutSettings
       jwtCfg = defaultJWTSettings myKey
       cookieCfg = if environment config == Local 
-                  then defaultCookieSettings{cookieIsSecure=NotSecure, cookieXsrfSetting = Nothing}
-                  else defaultCookieSettings
+                  then defaultCookieSettings{cookieIsSecure=NotSecure
+                                           , cookieXsrfSetting = Nothing}
+                  -- "If your web application runs no javascript, disabling XSRF entirely may be required."
+                  else defaultCookieSettings{cookieXsrfSetting = Nothing}
       cfg = cookieCfg :. jwtCfg :. EmptyContext
 
   Warp.runSettings settings $ logger $ ekadantaApp cfg cookieCfg jwtCfg ctx

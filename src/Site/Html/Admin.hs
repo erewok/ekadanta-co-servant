@@ -37,16 +37,18 @@ redirectPage uri = H.docTypeHtml $ do
     H.meta ! A.httpEquiv "refresh" ! A.content (H.toValue $ "1; url=" ++ uri)
   H.body $ do
     H.p "You are being redirected."
-    H.p $ do
+    H.p $
       void "If your browser does not refresh the page click "
   H.a ! A.href (H.toValue uri) $ "here"
 
 -- | Content Edit List: Show all Resources for editing
 contentEditList :: PageNum -> [Resource] -> Html
 contentEditList pgNum content = do
-  H.div ! A.class_ "edit-head" $
-    H.h1 "Admin"
-  renderPaginator pgNum
+  H.div ! A.class_ "edit-head" $ do
+    H.div ! A.class_ "edit-head-header" $
+      H.h1 "Admin"
+    H.div ! A.class_ "new-post-link" $ H.a ! A.href "/admin/item" $ "Create Item"
+    renderPaginator pgNum
   H.table ! A.class_ "u-full-width" $ do
     renderTableHead
     H.tbody $ mconcat (map renderTableRow content)
@@ -244,5 +246,5 @@ loginForm =
   H.section ! A.id "login" ! A.class_ "container login u-full-width u-max-full-width" $
     H.form ! A.method "post" ! A.action "/login" $ do
       H.input ! A.class_ "u-full-width" ! A.type_ "text" ! A.name "username" ! A.placeholder "Name" ! A.id "nameInput"
-      H.input ! A.class_ "u-full-width" ! A.type_ "text" !  A.name "password" ! A.placeholder "Password" ! A.id "emailInput"
+      H.input ! A.class_ "u-full-width" ! A.type_ "password" !  A.name "password" ! A.placeholder "Password" ! A.id "emailInput"
       H.input ! A.class_ "button u-pull-right" ! A.type_ "submit" ! A.value "Submit"

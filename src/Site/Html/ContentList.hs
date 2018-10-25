@@ -85,6 +85,8 @@ renderContentListItemTag tag = H.li ! A.class_ "content-list-item-tag" $ H.toMar
 
 
 -- | Auxiliary page content: paginator, search column, etc.
+-- TODO: Make it so page numbers are *links* to other pages.
+-- Create Link-function argument: PageNum -> (Int -> Html) -> Html
 renderPaginator :: PageNum -> Html
 renderPaginator (totalPages, currentPageNum) = 
   H.div ! A.class_ "content-list-paginator" $ do
