@@ -61,7 +61,7 @@ main = do
       jwtCfg = defaultJWTSettings myKey
       cookieCfg = if environment config == Local 
                   then defaultCookieSettings{cookieIsSecure=NotSecure, cookieXsrfSetting = Nothing}
-                  else defaultCookieSettings{cookieXsrfSetting = Nothing}
+                  else defaultCookieSettings
       cfg = cookieCfg :. jwtCfg :. EmptyContext
 
   Warp.runSettings settings $ logger $ ekadantaApp cfg cookieCfg jwtCfg ctx
