@@ -44,7 +44,7 @@ homeProjectsSection :: [Types.Resource] -> Html
 homeProjectsSection projects = 
   H.section ! A.class_ "home-section" $ do
     H.h2 ! A.class_ "section-head" $ "Projects"
-    H.section ! A.class_ "home-projects" $ do
+    H.section ! A.class_ "home-projects" $
       mconcat $ fmap (uncurry renderHomeProject) (zip [1..] projects)
 
 homeLatestPostSection :: Types.Resource -> Html
@@ -67,13 +67,11 @@ homeLatestPostSection post =
 renderHomeProject :: Int -> Types.Resource -> Html
 renderHomeProject projectNum project = 
   H.div ! A.class_ (H.toValue (T.unpack "home-project project" <> show projectNum)) $ do
-
     homeProjectTagList project
-
     H.div ! A.class_ "home-project-title" $
       H.h3 $ H.toMarkup $ project ^. Types.title
     H.div ! A.class_ "home-project-text" $
-      H.h3 $ H.toMarkup $ project ^. Types.body
+      H.h3 $ H.toMarkup $ project ^. Types.lede
     H.div ! A.class_ "home-project-button" $
       H.a ! A.class_ "button" ! A.href (H.toValue ("/projects/" <> project ^. Types.pid)) $
         "View Project"
