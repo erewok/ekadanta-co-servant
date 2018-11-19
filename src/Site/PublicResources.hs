@@ -74,7 +74,7 @@ searchContentListProcessor pgNum searchResult rt =
       let resources = pullHitsResources result
           resourceTotals = pullAggsKey "counts" result
           postTotal =  getKeyCount (T.pack . show $ rt) resourceTotals
-          pageCount = fromMaybe 0 postTotal
+          pageCount = (fromMaybe 0 postTotal) `div` _DEFAULT_PAGE_COUNT
           tagCounts = pullAggsKey "tags" result
           tagList = tagCounts ^.. folded . traverse . (_Object . ix "key" . _String)
       pure $ contentListPage (pageCount, pgNum) rt tagList resources

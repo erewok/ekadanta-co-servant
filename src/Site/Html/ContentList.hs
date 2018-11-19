@@ -31,7 +31,7 @@ contentListPageBuilder pgNum rtype allTags content = do
 
 
 makeSectionHead :: ResourceType -> Html
-makeSectionHead rtype = do
+makeSectionHead rtype =
   H.h2 ! A.class_ "section-head" $
     case rtype of
       About -> H.a ! A.href "/about" $ "About"
@@ -97,7 +97,8 @@ renderPaginator (totalPages, currentPageNum) =
     makeMaybeValidRightArrow totalPages currentPageNum
 
 makePaginatorButton :: Int -> Html
-makePaginatorButton num = H.div ! A.class_ "paginator" $ H.toMarkup num
+makePaginatorButton num = H.div ! A.class_ "paginator" $
+  H.a ! A.href (H.toValue $ "/posts/" <> show num) $ H.toMarkup num
 
 
 makeMaybeValidLeftArrow :: Int -> Html

@@ -5,7 +5,7 @@ import           Data.Aeson
 import           Data.Aeson.Lens
 import           Data.Aeson.Types         ( parseMaybe, parseEither, Result(..) )
 import           Data.Bifunctor           ( first )
-import           Data.Maybe               ( catMaybes )
+import           Data.Maybe               ( mapMaybe )
 import qualified Data.Text                as T
 import qualified Data.UUID                as UUID
 import qualified Data.UUID.V4             as UUID4
@@ -53,8 +53,8 @@ pullHitsResources value =
         . _Array 
         ^.. folded 
         . traverse 
-        . (key "_source")
-  in catMaybes $ map decodeMaybeResource sources
+        . key "_source"
+  in mapMaybe decodeMaybeResource sources
 
 decodeEitherResource :: Value -> Either Text Resource
 decodeEitherResource val = first T.pack $ parseEither parseJSON val
