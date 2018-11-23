@@ -26,7 +26,7 @@ contentListPageBuilder pgNum rtype allTags content = do
   H.div ! A.class_ "row" $ do
     H.div ! A.class_ "eight columns content-list" $ do
       renderContentList content
-      renderPaginator pgNum
+      renderPaginator pgNum makePaginatorButton
     renderSearchSection content allTags
 
 
@@ -87,13 +87,13 @@ renderContentListItemTag tag = H.li ! A.class_ "content-list-item-tag" $ H.toMar
 -- | Auxiliary page content: paginator, search column, etc.
 -- TODO: Make it so page numbers are *links* to other pages.
 -- Create Link-function argument: PageNum -> (Int -> Html) -> Html
-renderPaginator :: PageNum -> Html
-renderPaginator (totalPages, currentPageNum) = 
+renderPaginator :: PageNum -> (Int -> Html) -> Html
+renderPaginator (totalPages, currentPageNum) pagintorLinker = 
   H.div ! A.class_ "content-list-paginator" $ do
     makeMaybeValidLeftArrow currentPageNum
-    mconcat $ map makePaginatorButton [1..currentPageNum - 1]
+    mconcat $ map pagintorLinker [1..currentPageNum - 1]
     H.div ! A.class_ "paginator active" $ H.toMarkup currentPageNum
-    mconcat $ map makePaginatorButton [currentPageNum + 1..totalPages]
+    mconcat $ map pagintorLinker [currentPageNum + 1..totalPages]
     makeMaybeValidRightArrow totalPages currentPageNum
 
 makePaginatorButton :: Int -> Html

@@ -48,10 +48,16 @@ contentEditList pgNum content = do
     H.div ! A.class_ "edit-head-header" $
       H.h1 "Admin"
     H.div ! A.class_ "new-post-link" $ H.a ! A.href "/admin/item" $ "Create Item"
-    renderPaginator pgNum
+    renderPaginator pgNum makeAdminPaginatorButton
   H.table ! A.class_ "u-full-width" $ do
     renderTableHead
     H.tbody $ mconcat (map renderTableRow content)
+
+makeAdminPaginatorButton :: Int -> Html
+makeAdminPaginatorButton num = H.div ! A.class_ "paginator" $
+  H.a ! A.href (H.toValue $ "/admin/" <> show num) $ H.toMarkup num
+    
+            
 
 -- | Edit List helpers
 renderTableHead :: Html

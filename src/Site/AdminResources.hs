@@ -79,11 +79,10 @@ adminListItemsPaginatedH pgNum = do
       let resources = pullHitsResources result
           resourceTotals = pullAggsKey "counts" result
           postTotal =  getKeyCount (T.pack . show $ BlogPost) resourceTotals
-          pageCount = fromMaybe 0 postTotal
+          pageCount = (fromMaybe 0 postTotal)  `div` _DEFAULT_PAGE_COUNT
           tagCounts = pullAggsKey "tags" result
           tagList = tagCounts ^.. folded . traverse . (_Object . ix "key" . _String)
       pure $ adminEditListPage (pageCount, pgNum) resources
-
 
 -- | Create a new item
 adminCreateItemGetH :: EkadantaApp Html
