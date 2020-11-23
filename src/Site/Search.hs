@@ -1,28 +1,63 @@
 module Site.Search where
 
-import           Control.Lens
-import           Data.Aeson
-import           Data.Aeson.Lens
+import Control.Applicative ( (<|>) )
+import Control.Lens
+    ( Traversable(traverse), (^..), (^?), (^.), (&), set, at, folded, Ixed(ix) )
+import Data.Aeson
+    ( fromJSON,
+      FromJSON(parseJSON),
+      Result(..),
+      Value(Number, Object, String),
+      ToJSON(toJSON) )
+import Data.Aeson.Lens
+    ( key, AsPrimitive(_String), AsValue(_Object, _Array) )
 import           Data.Aeson.Types         ( parseMaybe, parseEither, Result(..) )
 import           Data.Bifunctor           ( first )
-import           Data.Maybe               ( mapMaybe )
+import           Data.Maybe               ( fromMaybe, fromJust, isNothing, mapMaybe )
 import qualified Data.Text                as T
 import qualified Data.UUID                as UUID
 import qualified Data.UUID.V4             as UUID4
-import           Network.HTTP.Client      hiding (Proxy)
-import           RIO                      hiding ( first )
+import Network.HTTP.Client ( defaultManagerSettings, newManager )
+import RIO
+    ( ($),
+      Eq((==)),
+      Monad((>>=)),
+      Show(..),
+      Applicative(pure),
+      Traversable(traverse),
+      Generic,
+      Semigroup((<>)),
+      Int,
+      Maybe(..),
+      IO,
+      Either(..),
+      (<$>),
+      (.),
+      id,
+      Proxy(..),
+      Text,
+      Bool(..),
+      mapMaybe,
+      Vector )
 import qualified RIO.HashMap              as HM
 import qualified RIO.List                 as L
 import qualified RIO.Vector               as V
-import           Servant.API
-import           Servant.Client
-import           Servant.Server
+import Servant.API
+import Servant.Client
+    ( ClientError,
+      client,
+      mkClientEnv,
+      runClientM,
+      ClientEnv,
+      ClientM,
+      parseBaseUrl )
+import Servant.Server ()
 import           Web.FormUrlEncoded                (Form(..)
                                                   , FromForm(..)
                                                   , ToForm(..))
 
-import           Site.Config
-import           Site.Types
+import Site.Config ( SiteConfig(esHost, esPort) )
+import Site.Types ( ResourceType(..), Resource(_pid), pid )
 
 
 -- | Higher-level useful search functions
@@ -30,7 +65,7 @@ getDocument :: SiteConfig -> UUID.UUID -> IO (Either Text Resource)
 getDocument config uid = do
   resourcesResp <- getContent config uid
   case resourcesResp of
-    Left err -> pure . Left $ "Failed looking up content"
+    Left _ -> pure . Left $ "Failed looking up content"
     Right value ->
       case value ^? _Object . ix "_source" of
         Nothing -> pure . Left $ "Failed looking up content"
@@ -40,19 +75,19 @@ getResourceHits :: SiteConfig -> Value -> IO (Either Text [Resource])
 getResourceHits config query = do
   resourcesResp <- searchContent config query
   case resourcesResp of
-    Left err -> pure . Left $ "Failed looking up content"
+    Left _ -> pure . Left $ "Failed looking up content"
     Right value -> pure . Right $ pullHitsResources value
 
 pullHitsResources :: Value -> [Resource]
-pullHitsResources value = 
+pullHitsResources value =
   let
-    sources = 
-      value 
-        ^? key "hits" 
+    sources =
+      value
+        ^? key "hits"
         . key "hits"
-        . _Array 
-        ^.. folded 
-        . traverse 
+        . _Array
+        ^.. folded
+        . traverse
         . key "_source"
   in mapMaybe decodeMaybeResource sources
 
@@ -60,11 +95,11 @@ decodeEitherResource :: Value -> Either Text Resource
 decodeEitherResource val = first T.pack $ parseEither parseJSON val
 
 decodeMaybeResource :: Value -> Maybe Resource
-decodeMaybeResource = parseMaybe parseJSON 
+decodeMaybeResource = parseMaybe parseJSON
 
 pullAggsKey :: Text -> Value -> Maybe (Vector Value)
-pullAggsKey aggName esResult = 
-  esResult 
+pullAggsKey aggName esResult =
+  esResult
     ^? key "aggregations"
     . key aggName
     . key "buckets"
@@ -74,7 +109,7 @@ getAggBucketKey :: Value -> Maybe Text
 getAggBucketKey obj = obj ^? _Object . ix "key" . _String
 
 getKeyCount :: Text -> Maybe (Vector Value) -> Maybe Int
-getKeyCount key_ resourceTotals = 
+getKeyCount key_ resourceTotals =
   let
     keyTotal = V.filter (\obj -> getAggBucketKey obj == Just key_) <$> resourceTotals
     maybeNum = L.headMaybe $ keyTotal ^.. folded . traverse . ix "doc_count"
@@ -97,10 +132,10 @@ searchAboutQ = searchRecentResourcesQ About 1
 searchTagsQ :: [Text] -> Value
 searchTagsQ tags = Object $ HM.fromList [
   ( "query"
-  ,  Object $ HM.fromList [ 
+  ,  Object $ HM.fromList [
     ("match",
-    Object $ HM.fromList [ 
-      ("_tags", Object $ HM.fromList [ 
+    Object $ HM.fromList [
+      ("_tags", Object $ HM.fromList [
         ("query", String $ T.unwords tags),
         ("operator", String "and" ) ]
       ) ]
@@ -110,7 +145,7 @@ searchTagsQ tags = Object $ HM.fromList [
 searchContentQ :: Text -> Value
 searchContentQ query = Object $ HM.fromList [
   ( "query"
-  ,  Object $ HM.fromList [ 
+  ,  Object $ HM.fromList [
     ("multi_match",
     Object $ HM.fromList [ ("match", String query)
                          , ("fields", toJSON ["_lede" :: Text, "_body" :: Text] ) ]
@@ -136,14 +171,14 @@ searchPaginatingQ rt Nothing offset = Object $ HM.fromList [
   ( "from", toJSON offset )
   , ( "size", toJSON _DEFAULT_PAGE_COUNT )
   , ( "query", resourceTypeTerm rt )
-  , ( "sort", pubDateDescSort ) 
+  , ( "sort", pubDateDescSort )
   , ("aggs", Object $ HM.fromList [ ("tags", tagsAgg), ("counts", docTypeCount) ] )
   ]
 searchPaginatingQ rt (Just count) offset = Object $ HM.fromList [
   ( "from", toJSON offset )
   , ( "size", toJSON count )
   , ( "query", resourceTypeTerm rt )
-  , ( "sort", pubDateDescSort ) 
+  , ( "sort", pubDateDescSort )
   , ("aggs", Object $ HM.fromList [ ("tags", tagsAgg), ("counts", docTypeCount) ] )
   ]
 
@@ -152,80 +187,90 @@ matchAllQ Nothing offset = Object $ HM.fromList [
   ( "from", toJSON offset )
   , ( "size", toJSON _DEFAULT_PAGE_COUNT )
   , ( "query", Object $ HM.fromList [("match_all", Object $ HM.fromList [])] )
-  , ( "sort", pubDateDescSort ) 
+  , ( "sort", pubDateDescSort )
   , ("aggs", Object $ HM.fromList [ ("tags", tagsAgg), ("counts", docTypeCount) ] )
   ]
 matchAllQ (Just count) offset = Object $ HM.fromList [
   ( "from", toJSON offset )
   , ( "size", toJSON count )
   , ( "query", Object $ HM.fromList [("match_all", Object $ HM.fromList [])] )
-  , ( "sort", pubDateDescSort ) 
+  , ( "sort", pubDateDescSort )
   , ("aggs", Object $ HM.fromList [ ("tags", tagsAgg), ("counts", docTypeCount) ] )
   ]
 
 resourceTypeTerm :: ResourceType -> Value
-resourceTypeTerm rt = Object $ HM.fromList [ ( "term", Object $ HM.fromList [( "_resourceType", String . T.pack . show $ rt )] )]
+resourceTypeTerm rt = Object $ HM.fromList [
+  ( "term", Object $ HM.fromList [
+    ( "_resourceType", String . T.pack . show $ rt )] )]
 
 pubDateDescSort :: Value
-pubDateDescSort = Object $ HM.fromList [ ( "_pubdate", Object $ HM.fromList [( "order", String "desc")])]
+pubDateDescSort = Object $ HM.fromList [
+  ( "_pubdate", Object $ HM.fromList [
+    ( "order", String "desc")])]
 
 tagsAgg :: Value
-tagsAgg = Object $ HM.fromList [ ( "terms", Object $ HM.fromList [( "field", String "_tags"), ("size", Number 1000 )] )]
+tagsAgg = Object $ HM.fromList [
+  ( "terms", Object $ HM.fromList [
+    ( "field", String "_tags"), ("size", Number 1000 )] )]
 
 docTypeCount :: Value
-docTypeCount = Object $ HM.fromList [ ( "terms", Object $ HM.fromList [( "field", String "_resourceType" ), ("size", Number 5) ] )]
+docTypeCount = Object $ HM.fromList [
+  ( "terms", Object $ HM.fromList [
+    ( "field", String "_resourceType" ), ("size", Number 5) ] )]
 
 -- | Client functions for interacting with our index/documents
-indexContent :: SiteConfig -> Maybe UUID.UUID -> Resource -> IO (Either ServantError Value)
+--   Generate a GUID if one is not supplied
+indexContent :: SiteConfig -> Maybe UUID.UUID -> Resource -> IO (Either ClientError Value)
 indexContent config muid item = do
+  nuid <- UUID4.nextRandom
   let indexer = indexDocument mkSearchClient
-  case muid of
-    Just truid -> runSearchClient config $ indexer truid item
-    Nothing -> do
-      nuid <- UUID4.nextRandom
-      let updateItem = item{_pid = UUID.toText nuid}
-      runSearchClient config $ indexer nuid updateItem
+      itemUid = if isNothing $ item^.pid then Just nuid else item^.pid
+      itemUidOrMuid = itemUid <|> muid
+      realUid = fromJust itemUidOrMuid
+      updatedItem = set pid itemUidOrMuid item
+  runSearchClient config $ indexer realUid updatedItem
 
-getContent :: SiteConfig -> UUID.UUID -> IO (Either ServantError Value)
-getContent config uid = 
-  runSearchClient config 
+getContent :: SiteConfig -> UUID.UUID -> IO (Either ClientError Value)
+getContent config uid =
+  runSearchClient config
     . ($ uid)
     . getSearchContent
     $ mkSearchClient
 
-searchContent :: SiteConfig -> Value -> IO (Either ServantError Value)
-searchContent config query = 
-  runSearchClient config 
+searchContent :: SiteConfig -> Value -> IO (Either ClientError Value)
+searchContent config query =
+  runSearchClient config
     . ($ query)
     . searchIndexContent
     $ mkSearchClient
 
-createIndexMapping :: SiteConfig -> Value -> IO (Either ServantError Value)
-createIndexMapping config mapping = 
-  runSearchClient config 
-    . ($ mapping)
-    . createSearchIndex
-    $ mkSearchClient
+createIndexMapping :: SiteConfig -> Maybe Bool -> Value -> IO (Either ClientError Value)
+createIndexMapping config includeTypeName mapping =
+  -- looks silly but we _always_ want to include this qparam...
+  let includeType = Just $ fromMaybe False includeTypeName
+      indexCreator = createSearchIndex mkSearchClient
+  in runSearchClient config $ indexCreator includeType mapping
+
 
 -- | Search API and utility client definitions
-type SearchAPI = 
-  "ekadanta" :> ReqBody '[JSON] Value :> Put '[JSON] Value
-  :<|> "ekadanta" :> "content" :> "_search" :> ReqBody '[JSON] Value :> Post '[JSON] Value
-  :<|> "ekadanta" :> "content" :> Capture "docId" UUID.UUID :> Get '[JSON] Value
-  :<|> "ekadanta" :> "content" :> Capture "docId" UUID.UUID :> ReqBody '[JSON] Resource :> Put '[JSON] Value
+type SearchAPI =
+  "ekadanta" :> QueryParam "include_type_name" Bool :> ReqBody '[JSON] Value :> Put '[JSON] Value
+  :<|> "ekadanta" :> "_search" :> ReqBody '[JSON] Value :> Post '[JSON] Value
+  :<|> "ekadanta" :> "_doc" :> Capture "docId" UUID.UUID :> Get '[JSON] Value
+  :<|> "ekadanta" :> "_doc" :> Capture "docId" UUID.UUID :> ReqBody '[JSON] Resource :> Put '[JSON] Value
 
-data SearchClient = 
-  SearchClient 
+data SearchClient =
+  SearchClient
   {
-  createSearchIndex :: Value -> ClientM Value
+  createSearchIndex :: Maybe Bool -> Value -> ClientM Value
   , searchIndexContent :: Value -> ClientM Value
   , getSearchContent :: UUID.UUID -> ClientM Value
   , indexDocument :: UUID.UUID -> Resource -> ClientM Value
-  } 
+  }
 
 mkSearchClient :: SearchClient
-mkSearchClient = 
-  let 
+mkSearchClient =
+  let
     createSearchIndex :<|> searchIndexContent :<|> getSearchContent :<|> indexDocument
       = client (Proxy :: Proxy SearchAPI)
   in SearchClient {..}
@@ -236,7 +281,7 @@ clientEnv config = do
   manager <- newManager defaultManagerSettings
   pure $ mkClientEnv manager baseUrl
 
-runSearchClient :: SiteConfig -> ClientM a -> IO (Either ServantError a)
+runSearchClient :: SiteConfig -> ClientM a -> IO (Either ClientError a)
 runSearchClient config = (clientEnv config >>=) . runClientM
 
 -- | forms

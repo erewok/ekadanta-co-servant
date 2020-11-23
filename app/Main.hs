@@ -13,9 +13,8 @@ import           RIO
 import           Servant.Checked.Exceptions.Internal.Servant.API (ErrStatus(toErrStatus))
 import           Servant
 import           Servant.Auth.Server
-import           Servant.Auth.Server.SetCookieOrphan ()
 import           System.Envy
-import           System.Log.FastLogger                 ( newStdoutLoggerSet 
+import           System.Log.FastLogger                 ( newStdoutLoggerSet
                                                        , defaultBufSize
                                                        , pushLogStrLn
                                                        , flushLogStr
@@ -25,7 +24,7 @@ import Site
 
 
 errorMaker :: SomeException -> Wai.Response
-errorMaker someErr = 
+errorMaker someErr =
   case (cast someErr :: Maybe AppErrors) of
     Just myError -> Wai.responseLBS (toErrStatus myError) [(hContentType, "application/json")] $ encode myError
     Nothing -> Wai.responseLBS internalServerError500 [(hContentType, "application/json")] $ "{\"status\": \"failed\", \"error\": \"" <> (encode $ show someErr) <> "\"}"
@@ -59,7 +58,7 @@ main = do
       timeoutSettings = Warp.setTimeout 55 portSettings
       settings = Warp.setOnExceptionResponse errorMaker timeoutSettings
       jwtCfg = defaultJWTSettings myKey
-      cookieCfg = if environment config == Local 
+      cookieCfg = if environment config == Local
                   then defaultCookieSettings{cookieIsSecure=NotSecure
                                            , cookieXsrfSetting = Nothing}
                   -- "If your web application runs no javascript, disabling XSRF entirely may be required."

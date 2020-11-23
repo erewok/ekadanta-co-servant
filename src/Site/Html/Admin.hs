@@ -56,8 +56,8 @@ contentEditList pgNum content = do
 makeAdminPaginatorButton :: Int -> Html
 makeAdminPaginatorButton num = H.div ! A.class_ "paginator" $
   H.a ! A.href (H.toValue $ "/admin/" <> show num) $ H.toMarkup num
-    
-            
+
+
 
 -- | Edit List helpers
 renderTableHead :: Html
@@ -75,9 +75,9 @@ renderTableHead =
         H.td "Featured Image"
 
 renderTableRow :: Resource -> Html
-renderTableRow item = 
+renderTableRow item =
   H.tr $ do
-    H.td $ H.a ! A.href (H.toValue ("/admin/item/" <> (item ^. pid))) $ H.toMarkup (item ^. pid)
+    H.td $ H.a ! A.href (H.toValue ("/admin/item/" <> getPidAsText item)) $ H.toMarkup (getPidAsText item)
     H.td $ H.toMarkup $ show (item ^. resourceType)
     H.td $ H.toMarkup $ show (item ^. contentEncoding)
     H.td $ renderPublishedCheck (item ^. published)
@@ -92,7 +92,7 @@ renderPublishedCheck False = "❌"
 renderPublishedCheck True = "✅"
 
 renderTagList :: [Text] -> Html
-renderTagList = H.toMarkup . (T.intercalate ", ")
+renderTagList = H.toMarkup . T.intercalate ", "
 
 renderFeaturedImg :: Maybe Text -> Html
 renderFeaturedImg Nothing = ""
@@ -115,7 +115,7 @@ newContentItemForm = do
       H.div ! A.class_ "two columns" $ do
         H.label ! A.for "pid" $ "Post ID"
         H.input ! A.type_ "text" ! A.id "pid" ! A.name "_pid" ! A.readonly "true" ! A.value (H.toValue . UUID.toText $ UUID.nil)
-      
+
       H.div ! A.class_ "two columns" ! A.class_ "publishedCheck" $ do
         H.label ! A.for "published" $ "Published"
         H.select ! A.class_ "u-fill-width" ! A.class_ "published" ! A.name "_published" $ do
@@ -137,35 +137,35 @@ newContentItemForm = do
 
       H.div ! A.class_ "two columns" $ do
         H.label ! A.for "pubdate" $ "Publication Date"
-        H.input ! A.type_ "text" 
+        H.input ! A.type_ "text"
           ! A.id "pubdate" ! A.name "_pubdate"
 
     H.label ! A.for "featuredImage" $ "Featured Image"
-    H.input ! A.type_ "text" 
-      ! A.id "featuredImage" ! A.name "_featuredImage" 
+    H.input ! A.type_ "text"
+      ! A.id "featuredImage" ! A.name "_featuredImage"
       ! A.placeholder "Featured Image URL" ! A.class_ "u-full-width"
 
     H.label ! A.for "title" $ "Title"
-    H.input ! A.type_ "text" 
-      ! A.id "title" ! A.name "_title" 
-      ! A.placeholder "Sample post title" ! A.class_ "u-full-width" 
+    H.input ! A.type_ "text"
+      ! A.id "title" ! A.name "_title"
+      ! A.placeholder "Sample post title" ! A.class_ "u-full-width"
 
     H.label ! A.for "lede" $ "Lede"
-    H.textarea 
+    H.textarea
       ! A.id "lede" ! A.name "_lede" ! A.rows "30"
-      ! A.placeholder "Lede" ! A.class_ "u-full-width" 
+      ! A.placeholder "Lede" ! A.class_ "u-full-width"
       $ ""
 
     H.label ! A.for "body" $ "Body"
-    H.textarea 
+    H.textarea
       ! A.id "body" ! A.name "_body" ! A.rows "60"
       ! A.placeholder "body" ! A.class_ "u-full-width"
       $ ""
-      
+
     H.label ! A.for "tags" $ "Tags"
-    H.input ! A.type_ "text" ! A.id "tags" 
-      ! A.name "_tags" ! A.placeholder "Haskell, Rust, etc." 
-      ! A.class_ "u-full-width" 
+    H.input ! A.type_ "text" ! A.id "tags"
+      ! A.name "_tags" ! A.placeholder "Haskell, Rust, etc."
+      ! A.class_ "u-full-width"
 
     H.input ! A.class_ "button-primary" ! A.type_ "submit" !  A.value "Send"
 
@@ -173,14 +173,14 @@ newContentItemForm = do
 updateContentItem :: Resource -> Html
 updateContentItem item = do
   H.div ! A.class_ "edit-head" $
-    H.h1 $ (H.toMarkup $ item ^. pid) <> (H.toMarkup . show $ item ^. resourceType)
+    H.h1 $ H.toMarkup (getPidAsText item) <> (H.toMarkup . show $ item ^. resourceType)
 
-  H.form ! A.method "post" ! A.action (H.toValue ("/admin/item/" <> (item ^. pid))) $ do
+  H.form ! A.method "post" ! A.action (H.toValue ("/admin/item/" <> getPidAsText item)) $ do
     H.div ! A.class_ "row" $ do
       H.div ! A.class_ "two columns" $ do
         H.label ! A.for "pid" $ "Post ID"
-        H.input ! A.type_ "text" ! A.id "pid" ! A.name "_pid" ! A.readonly "true" ! A.value (H.toValue $ item ^. pid)
-      
+        H.input ! A.type_ "text" ! A.id "pid" ! A.name "_pid" ! A.readonly "true" ! A.value (H.toValue $ getPidAsText item)
+
       H.div ! A.class_ "two columns" ! A.class_ "publishedCheck" $ do
         H.label ! A.for "published" $ "Published"
         H.select ! A.class_ "u-fill-width" ! A.class_ "published" ! A.name "_published" $ do
@@ -202,38 +202,38 @@ updateContentItem item = do
 
       H.div ! A.class_ "two columns" $ do
         H.label ! A.for "pubdate" $ "Publication Date"
-        H.input ! A.type_ "text" 
-          ! A.id "pubdate" ! A.name "_pubdate" 
+        H.input ! A.type_ "text"
+          ! A.id "pubdate" ! A.name "_pubdate"
           ! A.value (H.toValue $ item ^. pubdate)
 
     H.label ! A.for "featuredImage" $ "Featured Image"
-    H.input ! A.type_ "text" 
-      ! A.id "featuredImage" ! A.name "_featuredImage" 
-      ! A.placeholder "Featured Image URL" ! A.class_ "u-full-width" 
+    H.input ! A.type_ "text"
+      ! A.id "featuredImage" ! A.name "_featuredImage"
+      ! A.placeholder "Featured Image URL" ! A.class_ "u-full-width"
       ! A.value (H.toValue $ maybe "" id (item ^. featuredImage))
 
     H.label ! A.for "title" $ "Title"
-    H.input ! A.type_ "text" 
-      ! A.id "title" ! A.name "_title" 
-      ! A.placeholder "Sample post title" ! A.class_ "u-full-width" 
+    H.input ! A.type_ "text"
+      ! A.id "title" ! A.name "_title"
+      ! A.placeholder "Sample post title" ! A.class_ "u-full-width"
       ! A.value (H.toValue $ item ^. title)
 
     H.label ! A.for "lede" $ "Lede"
-    H.textarea 
+    H.textarea
       ! A.id "lede" ! A.name "_lede" ! A.rows "30"
-      ! A.placeholder "Lede" ! A.class_ "u-full-width" $ 
+      ! A.placeholder "Lede" ! A.class_ "u-full-width" $
         H.toMarkup $ item ^. lede
 
     H.label ! A.for "body" $ "Body"
-    H.textarea 
+    H.textarea
       ! A.id "body" ! A.name "_body" ! A.rows "60"
-      ! A.placeholder "body" ! A.class_ "u-full-width" $ 
+      ! A.placeholder "body" ! A.class_ "u-full-width" $
         H.toMarkup $ item ^. body
 
     H.label ! A.for "tags" $ "Tags"
-    H.input ! A.type_ "text" ! A.id "tags" 
-      ! A.name "_tags" ! A.placeholder "Haskell, Rust, etc." 
-      ! A.class_ "u-full-width" 
+    H.input ! A.type_ "text" ! A.id "tags"
+      ! A.name "_tags" ! A.placeholder "Haskell, Rust, etc."
+      ! A.class_ "u-full-width"
       ! A.value (H.toValue . T.intercalate ", " $ item ^. tags)
 
     H.input ! A.class_ "button-primary" ! A.type_ "submit" !  A.value "Send"
@@ -248,7 +248,7 @@ instance FromForm LoginForm
 
 
 loginForm :: Html
-loginForm = 
+loginForm =
   H.section ! A.id "login" ! A.class_ "container login u-full-width u-max-full-width" $
     H.form ! A.method "post" ! A.action "/login" $ do
       H.input ! A.class_ "u-full-width" ! A.type_ "text" ! A.name "username" ! A.placeholder "Name" ! A.id "nameInput"
