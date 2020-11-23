@@ -1,21 +1,15 @@
--- This file has been generated from package.yaml by hpack version 0.28.2.
---
--- see: https://github.com/sol/hpack
---
--- hash: fed11044068f28483cf8ef83f69681b5d792ff8a7e9263c891a44d9b1e198ce5
-
 name:           ekadanta-co
-version:        0.1.0.0
-description:    Please see the README on GitHub at <https://github.com/erewok/ekadanta-co#readme>
-homepage:       https://github.com/erewok/ekadanta-co#readme
-bug-reports:    https://github.com/erewok/ekadanta-co/issues
+version:        1.2.0.0
+description:    Please see the README on Gitlab at <https://gitlab.com/erewok/ekadanta-co-servant/-/blob/master/README.md>
+homepage:       https://gitlab.com/erewok/ekadanta-co-servant/-/blob/master/README.md
+bug-reports:    https://gitlab.com/erewok/ekadanta-co-servant/-/issues
 author:         Erik Aker
 maintainer:     eraker@gmail.com
-copyright:      2018 Erik aker
+copyright:      2020 Erik aker
 license:        BSD3
 license-file:   LICENSE
 build-type:     Simple
-cabal-version:  >= 1.10
+cabal-version:  >= 2.0
 extra-source-files:
     ChangeLog.md
     README.md
@@ -24,7 +18,7 @@ data-files:
 
 source-repository head
   type: git
-  location: https://github.com/erewok/ekadanta-co
+  location: https://gitlab.com/erewok/ekadanta-co-servant/-/tree/master
 
 library
   exposed-modules:
@@ -46,10 +40,11 @@ library
       Paths_ekadanta_co
   hs-source-dirs:
       src
+  ghc-options: -Wall
   default-extensions: DataKinds DeriveGeneric GADTs InstanceSigs LambdaCase MultiWayIf NoImplicitPrelude OverloadedStrings RecordWildCards ScopedTypeVariables TypeOperators UnicodeSyntax
   build-depends:
       aeson
-    , base >=4.7 && <5
+    , base >=4.13 && <5
     , bifunctors
     , blaze-html
     , blaze-markup
@@ -72,7 +67,7 @@ library
     , servant-checked-exceptions
     , servant-client
     , servant-server
-    , smtps-gmail
+    , smtp-mail
     , text
     , time
     , uuid
@@ -80,6 +75,7 @@ library
     , wai-extra
     , world-peace
   default-language: Haskell2010
+
 
 executable ekadanta-co
   main-is: Main.hs
@@ -88,10 +84,10 @@ executable ekadanta-co
   hs-source-dirs:
       app
   default-extensions: DataKinds DeriveGeneric GADTs InstanceSigs LambdaCase MultiWayIf NoImplicitPrelude OverloadedStrings RecordWildCards ScopedTypeVariables TypeOperators UnicodeSyntax
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       aeson
-    , base >=4.7 && <5
+    , base >=4.13 && <5
     , bifunctors
     , blaze-html
     , blaze-markup
@@ -115,7 +111,7 @@ executable ekadanta-co
     , servant-checked-exceptions
     , servant-client
     , servant-server
-    , smtps-gmail
+    , smtp-mail
     , text
     , time
     , uuid
@@ -125,12 +121,12 @@ executable ekadanta-co
     , world-peace
   default-language: Haskell2010
 
-test-suite ekadanta-co-test
+
+test-suite ekadanta-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
-      PublicResourcesSpec
-      Paths_ekadanta_co
+      Site.PublicResourcesSpec
   hs-source-dirs:
       test
   default-extensions: DataKinds DeriveGeneric GADTs InstanceSigs LambdaCase MultiWayIf NoImplicitPrelude OverloadedStrings RecordWildCards ScopedTypeVariables TypeOperators UnicodeSyntax
@@ -138,40 +134,51 @@ test-suite ekadanta-co-test
   build-depends:
       QuickCheck
     , aeson
-    , base >=4.7 && <5
-    , bifunctors
-    , blaze-html
-    , blaze-markup
-    , bytestring
-    , cmark
-    , cmark-gfm
-    , data-default
+    , base >=4.13 && <5
     , deepseq
     , ekadanta-co
     , envy
     , fast-logger
     , hspec
+    , hspec-discover
     , hspec-wai
     , hspec-wai-json
-    , http-api-data
     , http-client
     , http-types
     , lens
     , lens-aeson
-    , mime-mail
     , rio
     , servant
-    , servant-auth-server
     , servant-blaze
-    , servant-checked-exceptions
     , servant-client
     , servant-server
-    , smtps-gmail
     , text
-    , time
     , uuid
     , wai
     , wai-extra
     , warp
-    , world-peace
+  default-language: Haskell2010
+
+
+executable ekadanta-indexer
+  main-is: Indexer.hs
+  other-modules:
+      Paths_ekadanta_co
+  hs-source-dirs:
+      app
+  default-extensions: DataKinds DeriveGeneric GADTs InstanceSigs LambdaCase MultiWayIf NoImplicitPrelude OverloadedStrings RecordWildCards ScopedTypeVariables TypeOperators UnicodeSyntax
+  ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      aeson
+    , base >=4.13 && <5
+    , bifunctors
+    , bytestring
+    , data-default
+    , directory
+    , ekadanta-co
+    , envy
+    , fast-logger
+    , rio
+    , servant-client
+    , text
   default-language: Haskell2010

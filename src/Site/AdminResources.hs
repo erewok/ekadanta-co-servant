@@ -10,14 +10,13 @@ import qualified Data.Text                as T
 import qualified Data.UUID                as UUID
 import           GHC.Generics
 import           Network.HTTP.Types          (Status, status400, status404)
-import           RIO                  hiding ( Handler )
+import           RIO                  hiding ( Handler, (^..) )
 import           RIO.List                    ( headMaybe )
 import qualified RIO.HashMap              as HM
 import           Servant
 import           Servant.Client
 import           Servant.Server
 import           Servant.Auth.Server
-import           Servant.Auth.Server.SetCookieOrphan ()
 import           Servant.HTML.Blaze
 import qualified Servant.Checked.Exceptions as SCE
 import           Text.Blaze                  (ToMarkup(..), Markup, text)
@@ -34,12 +33,12 @@ type AdminAndLogin auths = (Auth auths AdminUser :> AdminApi) :<|> LoginApi
 adminServer :: CookieSettings -> JWTSettings -> ServerT (AdminAndLogin auths) EkadantaApp
 adminServer cs jwts = adminHandlers :<|> loginHandlers cs jwts
 
-type AdminApi = 
+type AdminApi =
   "admin" :> Get '[HTML] Html
     :<|> "admin" :> Capture "pgNum" Int :> Get '[HTML] Html
     :<|> "admin" :> "item" :> Get '[HTML] Html
     :<|> "admin" :> "item" :> ReqBody '[FormUrlEncoded] Resource :> Post '[HTML] Html
-    :<|> "admin" :> "item" :> Capture "item_id" UUID.UUID :> Get '[HTML] Html 
+    :<|> "admin" :> "item" :> Capture "item_id" UUID.UUID :> Get '[HTML] Html
     :<|> "admin" :> "item" :> Capture "item_id" UUID.UUID :> ReqBody '[FormUrlEncoded] Resource :> Post '[HTML] Html
 
 adminHandlers :: AuthResult AdminUser -> ServerT AdminApi EkadantaApp
@@ -50,7 +49,7 @@ adminHandlers (Servant.Auth.Server.Authenticated user) =
   :<|> adminCreateItemPostH
   :<|> adminUpdateItemGetH
   :<|> adminUpdateItemPostH
-adminHandlers _ = 
+adminHandlers _ =
   noAuthH
   :<|> noAuthArgH
   :<|> noAuthH
@@ -74,7 +73,7 @@ adminListItemsPaginatedH pgNum = do
   config     <- asks _getConfig
   resourcesResp  <- liftIO $ searchContent config query
   case resourcesResp of
-    Left err ->  throwM ContentLoadFailure
+    Left _ ->  throwM ContentLoadFailure
     Right result -> do
       let resources = pullHitsResources result
           resourceTotals = pullAggsKey "counts" result
@@ -94,7 +93,7 @@ adminCreateItemPostH item = do
   result <- liftIO $ indexContent config Nothing item
   case result of
     Left err -> throwM $ getServantErrBody err
-    Right result -> pure $ redirectPage "/admin"
+    Right _ -> pure $ redirectPage "/admin"
 
 
 -- | Edit a particular item by its uid
@@ -103,7 +102,7 @@ adminUpdateItemGetH uid = do
   config     <- asks _getConfig
   resourcesResp  <- liftIO $ getDocument config uid
   case resourcesResp of
-    Left err -> throwM MissingContent
+    Left _ -> throwM MissingContent
     Right resource -> pure $ adminEditDetailPage (Just resource)
 
 
@@ -113,16 +112,15 @@ adminUpdateItemPostH uid item = do
   result <- liftIO $ indexContent config (Just uid) item
   case result of
     Left err -> throwM $ getServantErrBody err
-    Right result -> pure $ redirectPage "/admin"
-    
+    Right _ -> pure $ redirectPage "/admin"
 
-getServantErrBody :: ServantError -> ServantErr
-getServantErrBody (ConnectionError connE) = err500 { errBody = "connection error" }
-getServantErrBody (FailureResponse rb) =  err500 { errBody = responseBody rb}
-getServantErrBody (DecodeFailure rct rb) =  err500 { errBody = responseBody rb }
-getServantErrBody (UnsupportedContentType rct rb) =  err500 { errBody = responseBody rb}
-getServantErrBody (InvalidContentTypeHeader rct ) =  err500 { errBody = "invalid content-type" }
 
+getServantErrBody :: ClientError -> ServerError
+getServantErrBody (ConnectionError _) = err500 { errBody = "connection error" }
+getServantErrBody (FailureResponse _ res) =  err500 { errBody = responseBody res}
+getServantErrBody (DecodeFailure _ rb) =  err500 { errBody = responseBody rb }
+getServantErrBody (UnsupportedContentType _ rb) =  err500 { errBody = responseBody rb}
+getServantErrBody (InvalidContentTypeHeader _ ) =  err500 { errBody = "invalid content-type" }
 
 
 -- | Login APIs
@@ -131,9 +129,9 @@ type LoginApi =
   :<|> "login"
       :> ReqBody '[FormUrlEncoded] LoginForm
       :> Post '[HTML] (Headers '[ Header "Set-Cookie" SetCookie, Header "Set-Cookie" SetCookie] Html)
-    
+
 loginHandlers :: CookieSettings -> JWTSettings -> ServerT LoginApi EkadantaApp
-loginHandlers cs jwts = loginGetH :<|> loginPostH cs jwts 
+loginHandlers cs jwts = loginGetH :<|> loginPostH cs jwts
 
 loginGetH :: EkadantaApp Html
 loginGetH = pure adminLoginPage
@@ -154,11 +152,11 @@ loginPostH cookieSettings jwtSettings form = do
         Just applyCookies -> return $ applyCookies $ redirectPage "/admin"
 
 validateLogin :: SiteConfig -> LoginForm -> Maybe AdminUser
-validateLogin config (LoginForm uname passwd ) = 
+validateLogin config (LoginForm uname passwd ) =
   if (uname == adminUsername config) && (passwd == adminPasswd config)
     then Just $ AdminUser (adminName config)
-    else Nothing 
-    
+    else Nothing
+
 
 data AdminUser = AdminUser { name :: Text }
    deriving (Eq, Show, Read, Generic)

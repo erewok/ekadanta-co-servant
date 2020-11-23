@@ -3,7 +3,7 @@ module Site.Html.Contact where
 import qualified Data.Text                   as T
 import qualified Data.Text.Lazy              as L
 import           GHC.Generics
-import           Network.Mail.Client.Gmail   (sendGmail)
+import           Network.Mail.SMTP
 import           Network.Mail.Mime           (Address(..))
 import           RIO
 import           Text.Blaze.Html             ( Html )
@@ -75,11 +75,12 @@ thanksPage = Base.pageSkeleton $
 constructSubject :: ContactForm -> T.Text
 constructSubject form = "New message from " `mappend` cname form
 
-constructBody :: ContactForm -> T.Text
-constructBody form = T.unlines ["From: " `mappend` cname form
-                             , "\nEmail: " `mappend` cemail form
-                             ,  "\n\n"
-                             , cmessage form]
+constructBody :: ContactForm -> L.Text
+constructBody form = L.fromStrict . T.unlines $ [
+  "From: " `mappend` cname form
+  , "\nEmail: " `mappend` cemail form
+  ,  "\n\n"
+  , cmessage form]
 
 sendContact :: SiteConfig -> ContactForm -> IO ()
 sendContact config contact = do
@@ -89,14 +90,13 @@ sendContact config contact = do
     to = [addressTrunk $ emailUsername config]
     cc = []
     bcc = []
-    attachments = []
     timeout = 6000000
     subject = constructSubject contact
-    body = constructBody contact
-  sendGmail
-    (L.fromStrict $ emailUsername config)
-      (L.fromStrict $ emailPasswd config)
-        from
-          to cc bcc
-            subject (L.fromStrict body) attachments timeout
-
+    body = plainTextPart $ constructBody contact
+    html = htmlPart ""
+    mail = simpleMail from to cc bcc subject [body, html]    
+  sendMailWithLogin 
+    "smtp.gmail.com"
+        (T.unpack $ emailUsername config)
+          (T.unpack $ emailPasswd config)
+            mail

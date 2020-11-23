@@ -15,7 +15,6 @@ import RIO hiding ( Handler )
 import qualified RIO.HashMap              as HM
 import Servant
 import Servant.Auth.Server
-import Servant.Auth.Server.SetCookieOrphan ()
 
 import Site.Config as X
 import Site.Exceptions as X
@@ -26,8 +25,8 @@ import Site.Types as X
 
 
 
-type SiteWideApi auths = 
-  PublicApi 
+type SiteWideApi auths =
+  PublicApi
   :<|> AdminAndLogin auths
   :<|> "health" :> Get '[JSON] Value
   :<|> "static" :> Raw
@@ -46,6 +45,6 @@ healthServer :: EkadantaApp Value
 healthServer = return $ Object $ HM.fromList [("status", String "ok")]
 
 ekadantaApp :: Context '[CookieSettings, JWTSettings] -> CookieSettings -> JWTSettings -> EkadantaCtx -> Application
-ekadantaApp cfg cs jwts ctx = 
-  serveWithContext siteWideApi cfg $ 
+ekadantaApp cfg cs jwts ctx =
+  serveWithContext siteWideApi cfg $
     hoistServerWithContext siteWideApi (Proxy :: Proxy '[CookieSettings, JWTSettings]) (runRIO ctx) (siteWideHandlers cs jwts)

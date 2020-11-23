@@ -7,7 +7,7 @@ import           Data.Aeson.Types
 import           Data.Maybe
 import qualified Data.Text                as T
 import qualified Data.UUID                as UUID
-import           RIO                  hiding ( Handler )
+import           RIO                  hiding ( Handler, (^..) )
 import           RIO.List                    ( headMaybe )
 import qualified RIO.HashMap              as HM
 import           Servant
@@ -66,7 +66,7 @@ getPaginatedContent rt pgNum = do
     Left err ->  SCE.pureErrEnvelope ContentLoadFailure
     Right render -> SCE.pureSuccEnvelope render
 
-searchContentListProcessor :: Int -> Either ServantError Value -> ResourceType -> Either T.Text Html
+searchContentListProcessor :: Int -> Either ClientError Value -> ResourceType -> Either T.Text Html
 searchContentListProcessor pgNum searchResult rt =
   case searchResult of
     Left err -> Left "Failed looking up content"

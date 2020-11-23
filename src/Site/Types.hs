@@ -2,13 +2,29 @@
 
 module Site.Types where
 
-import           Control.Lens               hiding ( (.=) )
-import           Data.Aeson
+import Control.Lens ( (^.), at, non, makeLenses )
+import Data.Aeson ( FromJSON, ToJSON )
 import qualified Data.Text                         as T
-import           Data.Time.Clock                   ( UTCTime )
+import qualified Data.UUID                as UUID
 import           GHC.Exts                          (IsList(..))
-import           GHC.Generics
-import           RIO
+import GHC.Generics ( Generic )
+import RIO
+    ( otherwise,
+      ($),
+      join,
+      Eq((==)),
+      Read,
+      Show(..),
+      Semigroup((<>)),
+      Bool(False),
+      Int,
+      Maybe(Nothing),
+      Either(..),
+      (<$>),
+      (.),
+      (=<<),
+      maybe,
+      Text )
 import qualified Text.Blaze.Html5                   as H
 import           Web.FormUrlEncoded                (Form(..)
                                                   , FromForm(..)
@@ -34,9 +50,10 @@ data Resource = Resource {
   , _title :: !Text
   , _lede  :: !Text
   , _tags :: [Text]
-  , _pid :: !Text
+  , _pid :: Maybe UUID.UUID
 } deriving (Eq, Show, Generic)
 
+defaultResource :: Resource
 defaultResource = Resource {
   _pubdate = "0/0/0"
   , _resourceType = BlogPost
@@ -47,7 +64,7 @@ defaultResource = Resource {
   , _title = ""
   , _lede = ""
   , _tags = []
-  , _pid = ""
+  , _pid = Nothing
   }
 
 instance FromForm Resource
@@ -78,13 +95,13 @@ instance FromHttpApiData ResourceType where
   parseUrlPiece = parseResourceType
 
 instance FromForm ResourceType where
-  fromForm frm = 
+  fromForm frm =
     let parsed = parseUnique "_resourceType" frm :: Either T.Text T.Text
-    in join (parseResourceType <$> parsed)
+    in parseResourceType =<< parsed
 
 -- | ContentEncoding for differentiating type of content
 
-data ContentEncoding = ContentMarkdown 
+data ContentEncoding = ContentMarkdown
                       | ContentHtml
                       deriving (Eq, Show, Generic, Read)
 
@@ -102,14 +119,18 @@ instance FromHttpApiData ContentEncoding where
   parseUrlPiece = parseContentEncoding
 
 instance FromForm ContentEncoding where
-  fromForm frm = 
+  fromForm frm =
     let parsed = parseUnique "_contentEncoding" frm :: Either T.Text T.Text
-    in join (parseContentEncoding <$> parsed)
-  
+    in parseContentEncoding =<< parsed
+
 
 instance FromJSON ContentEncoding
 instance ToJSON ContentEncoding
-    
--- | Lenses
 
+-- | Lenses
 makeLenses ''Resource
+
+getPidAsText :: Resource -> Text
+getPidAsText item = let
+  maybePid = item ^. pid
+  in maybe "" UUID.toText maybePid

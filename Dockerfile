@@ -1,5 +1,6 @@
 FROM debian:stretch-slim as builder
 
+ENV LANG C.UTF-8
 SHELL ["/bin/bash", "-Eeuxo", "pipefail", "-c"]
 
 RUN apt-get update && \
@@ -8,23 +9,30 @@ RUN apt-get update && \
     libffi-dev \
     libgmp-dev \
     zlib1g-dev \
+    gnupg2 \
+    dirmngr \
     curl \
     ca-certificates \
-    tcl \
     netbase \
-    && curl -sSL "https://get.haskellstack.org/" | sh \
     && rm -rf /var/lib/apt/lists/* \
     && mkdir -p /opt/ekadanta-co/bin
 
+RUN echo 'deb http://downloads.haskell.org/debian stretch main' > /etc/apt/sources.list.d/ghc.list && \
+    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys BA3CBA3FFE22B574 && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends ghc-8.10.2 cabal-install-3.2
+
+ENV PATH /root/.cabal/bin:/root/.local/bin:/opt/cabal/3.2/bin:/opt/ghc/8.10.2/bin:$PATH
+
 WORKDIR /opt/ekadanta-co/
 
-COPY stack.yaml package.yaml ChangeLog.md README.md /opt/ekadanta-co/
+COPY ekadanta-co.cabal ChangeLog.md README.md /opt/ekadanta-co/
 
-RUN stack --no-terminal --install-ghc build --only-dependencies
+RUN cabal update && cabal build --only-dependencies
 
 COPY . /opt/ekadanta-co
 
-RUN stack install
+RUN cabal install
 
 FROM debian:stretch-slim as base_os
 
@@ -37,7 +45,7 @@ RUN apt-get update && \
     ca-certificates \
     netbase
 
-COPY --from=builder /root/.local/bin/ekadanta-co /opt/ekadanta-co/bin/
+COPY --from=builder /root/.cabal/bin/ekadanta-co /opt/ekadanta-co/bin/
 
 WORKDIR /opt/ekadanta-co/
 

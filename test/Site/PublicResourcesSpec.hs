@@ -1,33 +1,55 @@
-module PublicResourcesSpec where
+module Site.PublicResourcesSpec where
 
 import qualified Control.Concurrent               as C
-import           Control.DeepSeq
+import Control.DeepSeq ()
 import           Control.Exception                (evaluate)
-import           Data.Aeson
-import           Data.Aeson.Lens
+import Data.Aeson ( Value(Object, Array, String), ToJSON(toJSON) )
+import Data.Aeson.Lens ()
 import           Data.Text.Encoding               ( encodeUtf8 )
 import qualified Data.UUID                        as UUID
-import           Network.Wai
+import Network.Wai ( Application )
 import qualified Network.Wai.Handler.Warp         as Warp
-import           RIO                       hiding ( Handler, evaluate )
+import RIO
+    ( ($),
+      Eq((==)),
+      Monad((>>)),
+      Applicative(pure),
+      Semigroup((<>)),
+      Bool(True),
+      Maybe(Just),
+      IO,
+      (.),
+      MonadIO(liftIO),
+      Proxy(..),
+      undefined,
+      bracket,
+      runRIO,
+      encodeUtf8 )
 import qualified RIO.HashMap                   as HM
 import qualified RIO.Vector                    as V
-import           Servant
-import           Servant.Server
-import           System.Log.FastLogger            ( newStdoutLoggerSet 
+import Servant
+    ( type (:<|>)((:<|>)), Handler, Server, hoistServer, serve )
+import Servant.Server ()
+import           System.Log.FastLogger            ( newStdoutLoggerSet
                                                   , defaultBufSize
                                                   , pushLogStrLn
                                                   , flushLogStr )
-import           System.Envy                                                  
-import           Test.Hspec
-import           Test.Hspec.Wai                                                    
-import           Test.Hspec.Wai.Matcher
+import System.Envy ( DefConfig(defConfig) )
+import Test.Hspec ( around_, describe, it, runIO, Spec )
+import Test.Hspec.Wai ( get, shouldRespondWith, with )
+import Test.Hspec.Wai.Matcher ()
 
-import           Site
-import           Site.Loggers
-import           Site.PublicResources
-import           Site.Search
-import           Site.Types
+import Site
+    ( SiteConfig(environment, version, esHost, esPort),
+      Environment(Test),
+      EkadantaCtx(..) )
+import Site.Loggers ()
+import Site.PublicResources ( PublicApi, publicHandlers )
+import Site.Search ( SearchAPI )
+import Site.Types
+    ( ContentEncoding(ContentMarkdown),
+      ResourceType(BlogPost),
+      Resource(..) )
 
 
 spec :: Spec
@@ -59,7 +81,7 @@ spec = around_ withElasticsearch $ do
         _ <- get (encodeUtf8 $ "/projects/" <> UUID.toText UUID.nil) `shouldRespondWith` 404
         pure ()
       it "should return a specific projects" $ do
-        _ <- get ("/projects/4102f030-a81c-44fa-9a7e-5ddc247297a7") `shouldRespondWith` 200
+        _ <- get "/projects/4102f030-a81c-44fa-9a7e-5ddc247297a7" `shouldRespondWith` 200
         pure ()
 
 
@@ -71,15 +93,15 @@ makeCtx = do
     environment = Test
     , version = "testing"
     , esHost = "http://localhost"
-    , esPort = "9999"    
+    , esPort = "9999"
   }
   logset <- newStdoutLoggerSet defaultBufSize
   pure EkadantaCtx { _getLogger = logset, _getConfig = realConfig }
 
 
 publicApp :: EkadantaCtx -> Application
-publicApp ctx = 
-  serve (Proxy :: Proxy PublicApi) $ 
+publicApp ctx =
+  serve (Proxy :: Proxy PublicApi) $
     hoistServer (Proxy :: Proxy PublicApi) (runRIO ctx) publicHandlers
 
 
@@ -101,7 +123,7 @@ esTestServer =
 
 searchESIndex :: Value -> Handler Value
 searchESIndex (Object hmap) = pure $ Object $ HM.fromList [
-  ("hits", Object $ HM.fromList [ 
+  ("hits", Object $ HM.fromList [
     ("hits", Array $ V.fromList [Object $ HM.fromList [("_source", toJSON defaultPostSource)]] )
     ] )
   ]
@@ -109,28 +131,28 @@ searchESIndex _ = pure $ Object $ HM.fromList [("bad", String "data")]  -- This 
 
 
 getESDocument :: UUID.UUID -> Handler Value
-getESDocument uid = 
+getESDocument uid =
   if uid == UUID.nil -- This is how we single a failing result...
     then pure . Object $ HM.fromList [("bad", String "data")]
     else pure $ Object $ HM.fromList [("_source", defaultPostSource)]
-  
+
 defaultPostSource :: Value
-defaultPostSource = 
+defaultPostSource =
   toJSON $ Resource {
     _pubdate = "2018-01-01"
     , _resourceType = BlogPost
     , _contentEncoding = ContentMarkdown
-    , _featuredImage = Just "http://some-image" 
+    , _featuredImage = Just "http://some-image"
     , _published = True
     , _body = "This is a post body"
     , _title = "Post Title"
     , _lede = "Some posts have some teaser text"
     , _tags = ["testing", "defaults", "elasticsearch"]
-    , _pid = "4102f030-a81c-44fa-9a7e-5ddc247297a7"
+    , _pid = UUID.fromString "4102f030-a81c-44fa-9a7e-5ddc247297a7"
   }
 
 
-createESIndex :: Value -> Handler Value
+createESIndex :: Maybe Bool -> Value -> Handler Value
 createESIndex = undefined
 
 upsertESDocument :: UUID.UUID -> Resource -> Handler Value

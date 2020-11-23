@@ -17,7 +17,7 @@ import           Site.Types
 
 
 contentListPage ::  PageNum -> ResourceType -> AllSiteTags -> [Resource] -> Html
-contentListPage pgNum rtype allTags content = 
+contentListPage pgNum rtype allTags content =
   Base.pageSkeleton $ contentListPageBuilder pgNum rtype allTags content
 
 contentListPageBuilder :: PageNum -> ResourceType -> AllSiteTags -> [Resource] -> Html
@@ -49,17 +49,17 @@ renderContentListItem item =
     renderContentListItemFeaturedImg item
     renderContentListItemLede item
     renderContentListItemTagList (item ^. tags)
-   
+
 
 renderContentListItemFeaturedImg :: Resource -> Html
-renderContentListItemFeaturedImg item = 
+renderContentListItemFeaturedImg item =
   case (item ^. featuredImage) of
     Nothing -> pure ()
     Just img -> H.div ! A.class_ "content-list-item-featured-img" $
       H.img ! A.src (H.toValue img)
 
 renderContentListItemLede :: Resource -> Html
-renderContentListItemLede item = 
+renderContentListItemLede item =
   H.div ! A.class_ "content-list-item-lede" $ do
     H.span ! A.class_ "content-list-item-date" $ H.toMarkup (item ^. pubdate)
     H.h3 $ H.toMarkup (item ^. title)
@@ -69,10 +69,10 @@ renderContentListItemLede item =
 
 
 readMoreLink :: Resource -> Html
-readMoreLink item = 
+readMoreLink item =
   if (item ^. resourceType) == BlogPost
-    then H.a ! A.href (H.toValue $ "/posts/" <> item ^. pid) $ "Read More..."
-    else H.a ! A.href (H.toValue $ "/projects/" <> item ^. pid) $ "Read More..."
+    then H.a ! A.href (H.toValue $ "/posts/" <> getPidAsText item) $ "Read More..."
+    else H.a ! A.href (H.toValue $ "/projects/" <> getPidAsText item) $ "Read More..."
 
 renderContentListItemTagList :: [Text] -> Html
 renderContentListItemTagList tags =
@@ -88,7 +88,7 @@ renderContentListItemTag tag = H.li ! A.class_ "content-list-item-tag" $ H.toMar
 -- TODO: Make it so page numbers are *links* to other pages.
 -- Create Link-function argument: PageNum -> (Int -> Html) -> Html
 renderPaginator :: PageNum -> (Int -> Html) -> Html
-renderPaginator (totalPages, currentPageNum) pagintorLinker = 
+renderPaginator (totalPages, currentPageNum) pagintorLinker =
   H.div ! A.class_ "content-list-paginator" $ do
     makeMaybeValidLeftArrow currentPageNum
     mconcat $ map pagintorLinker [1..currentPageNum - 1]
@@ -102,13 +102,13 @@ makePaginatorButton num = H.div ! A.class_ "paginator" $
 
 
 makeMaybeValidLeftArrow :: Int -> Html
-makeMaybeValidLeftArrow currentPageNum = 
+makeMaybeValidLeftArrow currentPageNum =
   if currentPageNum == 1
     then H.div ! A.class_ "paginator invalid" $ "<"
     else H.div ! A.class_ "paginator valid" $ "<"
 
 makeMaybeValidRightArrow :: PageTotal -> CurrentPage -> Html
-makeMaybeValidRightArrow totalPages currentPageNum = 
+makeMaybeValidRightArrow totalPages currentPageNum =
   if currentPageNum == totalPages
     then H.div ! A.class_ "paginator invalid" $ ">"
     else H.div ! A.class_ "paginator valid" $ ">"
@@ -132,4 +132,4 @@ renderSearchTags currentTags allTags = do
 
   foldMap makeActiveTag (HS.toList activeHashTags)
   foldMap makeInactiveTag (HS.toList inactiveTags)
-  
+
