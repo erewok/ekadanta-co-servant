@@ -31,8 +31,7 @@ WORKDIR /opt/ekadanta-co/
 
 COPY ekadanta-co.cabal ChangeLog.md README.md /opt/ekadanta-co/
 
-RUN cabal update && cabal build ekadanta-test --enable-tests --enable-coverage
-
+RUN cabal update && cabal build --dependencies-only ekadanta-test --enable-tests --enable-coverage
 COPY data_files /opt/ekadanta-co/data_files
 COPY src /opt/ekadanta-co/src
 COPY test /opt/ekadanta-co/test
