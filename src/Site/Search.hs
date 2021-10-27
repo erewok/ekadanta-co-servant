@@ -221,14 +221,19 @@ docTypeCount = Object $ HM.fromList [
 -- | Client functions for interacting with our index/documents
 --   Generate a GUID if one is not supplied
 indexContent :: SiteConfig -> Maybe UUID.UUID -> Resource -> IO (Either ClientError Value)
-indexContent config muid item = do
+indexContent config Nothing item = do
+  -- CREATE A UUID for this Item
   nuid <- UUID4.nextRandom
-  let indexer = indexDocument mkSearchClient
-      itemUid = if isNothing $ item^.pid then Just nuid else item^.pid
-      itemUidOrMuid = itemUid <|> muid
-      realUid = fromJust itemUidOrMuid
-      updatedItem = set pid itemUidOrMuid item
-  runSearchClient config $ indexer realUid updatedItem
+  let updatedItem = set pid (Just nuid) item
+      indexer = indexDocument mkSearchClient
+  runSearchClient config $ indexer nuid updatedItem
+indexContent config (Just itemUid) item = do
+  -- UPDATE this Item at `itemUid`
+  let updatedItem = set pid (Just itemUid) item
+      indexer = indexDocument mkSearchClient
+  runSearchClient config $ indexer itemUid updatedItem
+
+
 
 getContent :: SiteConfig -> UUID.UUID -> IO (Either ClientError Value)
 getContent config uid =

@@ -18,7 +18,7 @@ data-files:
 
 source-repository head
   type: git
-  location: https://gitlab.com/erewok/ekadanta-co-servant/-/tree/master
+  location: https://github.com/erewok/ekadanta-co-servant
 
 library
   exposed-modules:
@@ -44,7 +44,7 @@ library
   default-extensions: DataKinds DeriveGeneric GADTs InstanceSigs LambdaCase MultiWayIf NoImplicitPrelude OverloadedStrings RecordWildCards ScopedTypeVariables TypeOperators UnicodeSyntax
   build-depends:
       aeson
-    , base >=4.13 && <5
+    , base
     , bifunctors
     , blaze-html
     , blaze-markup
@@ -87,7 +87,7 @@ executable ekadanta-co
   ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       aeson
-    , base >=4.13 && <5
+    , base
     , bifunctors
     , blaze-html
     , blaze-markup
@@ -134,7 +134,7 @@ test-suite ekadanta-test
   build-depends:
       QuickCheck
     , aeson
-    , base >=4.13 && <5
+    , base
     , deepseq
     , ekadanta-co
     , envy
