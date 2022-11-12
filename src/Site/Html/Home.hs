@@ -49,12 +49,17 @@ homeAboutSection =
 homeAboutContent :: Html
 homeAboutContent = do
   H.h1 "👋 Hi, I'm Erik."
-  H.p . H.toMarkup . T.unlines $ ["I'm a former English teacher and freelance writer. "
-                                , "Now I work as a software developer in San Diego, California."
-                                , "My areas of expertise are Python, Javascript, ETL, DevOps, cloud infrastructure, "
-                                , " and application design."]
-  H.p . H.toMarkup . T.unlines $ ["My interests include functional programming in Haskell,"
-                                 ," natural language processing, surfing, and playing with Milo (my son)."]
+  H.p . H.toMarkup . T.unlines $ ["I'm a software developer in San Diego, California,"
+                                , " working in Python, Rust, and Kubernetes. "
+                                , "My interests include functional programming in Haskell and Rust,"
+                                , " as well as surfing, and spending time near the ocean."
+                                ]
+  H.p $ H.toMarkup ("Reach me here: " :: T.Text)
+  H.a ! A.href "https://github.com/erewok" $
+    H.i ! A.class_ "fa-brands fa-github" $  "Github"
+  H.a ! A.href "https://fosstodon.org/web/@erewok" $
+    H.i ! A.class_ "fa-brands fa-mastodon" $  "Mastodon"
+
 
 homeProjectsSection :: [Types.Resource] -> Html
 homeProjectsSection projects =
@@ -76,7 +81,6 @@ homeLatestPostSection post =
           H.div ! A.class_ "home-latest-post-read-more" $
             H.a ! A.href (H.toValue $ "/posts/" <> Types.getPidAsText post) $
               "Read More..."
-
 
 -- | Project rendering helpers
 

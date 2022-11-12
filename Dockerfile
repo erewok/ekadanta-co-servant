@@ -20,9 +20,9 @@ RUN apt-get update && \
 RUN echo 'deb http://downloads.haskell.org/debian stretch main' > /etc/apt/sources.list.d/ghc.list && \
     apt-key adv --keyserver keyserver.ubuntu.com --recv-keys BA3CBA3FFE22B574 && \
     apt-get update && \
-    apt-get install -y --no-install-recommends ghc-8.10.2 cabal-install-3.2
+    apt-get install -y --no-install-recommends ghc-9.2.4 cabal-install-3.6
 
-ENV PATH /root/.cabal/bin:/root/.local/bin:/opt/cabal/3.2/bin:/opt/ghc/8.10.2/bin:$PATH
+ENV PATH /root/.cabal/bin:/root/.local/bin:/opt/cabal/3.6/bin:/opt/ghc/9.2.4/bin:$PATH
 
 WORKDIR /opt/ekadanta-co/
 

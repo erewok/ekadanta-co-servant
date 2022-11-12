@@ -10,6 +10,9 @@ module Site (
 ) where
 
 import Data.Aeson
+import Data.Aeson.Key (fromText)
+import Data.Aeson.KeyMap
+    (fromList, KeyMap)
 import Network.Wai (Application)
 import RIO hiding ( Handler )
 import qualified RIO.HashMap              as HM
@@ -42,7 +45,7 @@ siteWideHandlers cs jwts =
   :<|> serveDirectoryFileServer "static"
 
 healthServer :: EkadantaApp Value
-healthServer = return $ Object $ HM.fromList [("status", String "ok")]
+healthServer = return $ Object $ fromList [(fromText "status", String "ok")]
 
 ekadantaApp :: Context '[CookieSettings, JWTSettings] -> CookieSettings -> JWTSettings -> EkadantaCtx -> Application
 ekadantaApp cfg cs jwts ctx =

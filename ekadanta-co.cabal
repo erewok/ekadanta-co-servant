@@ -28,7 +28,6 @@ library
       Site.Exceptions
       Site.Html.Admin
       Site.Html.Base
-      Site.Html.Contact
       Site.Html.ContentDetail
       Site.Html.ContentList
       Site.Html.Home
