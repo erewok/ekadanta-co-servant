@@ -22,7 +22,8 @@ If you have Docker installed, you can build the Docker image and run this projec
 
 ```sh
 $ docker build -t ekadanta-co:latest
-...
+[+] Building 526.6s (19/19) FINISHED
+
 $ export TAG=latest
 
 $ docker-compose up
