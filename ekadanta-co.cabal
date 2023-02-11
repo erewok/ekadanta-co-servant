@@ -1,5 +1,5 @@
 name:           ekadanta-co
-version:        1.3.0.0
+version:        1.3.1.0
 description:    Please see the README on Gitlab at <https://gitlab.com/erewok/ekadanta-co-servant/-/blob/master/README.md>
 homepage:       https://gitlab.com/erewok/ekadanta-co-servant/-/blob/master/README.md
 bug-reports:    https://gitlab.com/erewok/ekadanta-co-servant/-/issues
@@ -57,7 +57,6 @@ library
     , http-types
     , lens
     , lens-aeson
-    , mime-mail
     , rio
     , servant
     , servant-auth-server
@@ -65,7 +64,6 @@ library
     , servant-checked-exceptions
     , servant-client
     , servant-server
-    , smtp-mail
     , text
     , time
     , uuid
@@ -101,7 +99,6 @@ executable ekadanta-co
     , http-types
     , lens
     , lens-aeson
-    , mime-mail
     , rio
     , servant
     , servant-auth-server
@@ -109,7 +106,6 @@ executable ekadanta-co
     , servant-checked-exceptions
     , servant-client
     , servant-server
-    , smtp-mail
     , text
     , time
     , uuid

@@ -45,8 +45,6 @@ renderDetailHead :: PubDate -> Html
 renderDetailHead pubDate =
   H.div ! A.class_ "content-detail-head" $ do
     H.span ! A.class_ "content-detail-date-head" $ H.toMarkup pubDate
-    H.div ! A.class_ "content-detail-contact-head" $
-      H.ul ! A.class_ "content-detail-contact-links" $ contactLinks
 
 -- | Detail Page Content
 renderDetailContent :: Types.Resource -> Html
@@ -59,9 +57,6 @@ renderDetailContent post = do
       H.span ! A.class_ "content-detail-lede" $ H.toMarkup (post ^. Types.lede)
 
     H.div ! A.class_ "content-detail-body-content" $ renderBodyAsHtmlOrMarkdown post
-    
-    H.div ! A.class_ "content-detail-contact" $
-      H.ul ! A.class_ "content-detail-body-contact-links" $ contactLinks
 
 renderBodyAsHtmlOrMarkdown :: Types.Resource -> Html
 renderBodyAsHtmlOrMarkdown post =
@@ -74,12 +69,3 @@ type FeaturedImg = Maybe Text
 maybeInsertFeaturedImg ::  FeaturedImg -> Html
 maybeInsertFeaturedImg Nothing = pure ()
 maybeInsertFeaturedImg (Just img) = H.img ! A.class_ "content-detail-featured-img" ! A.src (H.toValue img)
-
--- | Utilities/helpers
-contactLinks = do
-  H.li $ 
-    H.a ! A.href "https://github.com/erewok/" $ H.i ! A.class_ "fa fa-github" $ ""
-  H.li $ 
-    H.a ! A.href "https://www.linkedin.com/in/erik-aker-41a3aa89/" $ H.i ! A.class_ "fa fa-linkedin" $ ""
-  H.li $ 
-    H.a ! A.href "https://twitter.com/erewok" $ H.i ! A.class_ "fa fa-twitter" $ ""

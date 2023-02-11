@@ -7,25 +7,19 @@ import Data.Aeson (eitherDecodeFileStrict', Value)
 import qualified Data.Text as T
 import RIO
     ( FilePath, Either(..), IO, Maybe(..), String,
-      (<$>), (<>), (>>), (>>=), (||), ($), (.),
+      (<$>), (<>), (>>), (||), ($), (.),
       map,
       mapM, mapM_,
-      first,
-      id,
       not,
       fromRight,
       and,
-      concat,
       null,
       pure,
-      undefined,
       exitWith,
       show,
       ExitCode(ExitFailure),
       LogLevel(..) )
--- import RIO.Process
 import RIO.Time (getCurrentTime)
-import Servant.Client ( ClientError )
 import System.Envy (decodeEnv, DefConfig(..))
 import System.Log.FastLogger
   ( newStdoutLoggerSet,
@@ -36,11 +30,8 @@ import System.Log.FastLogger
     ToLogStr(..) )
 
 import Site
-    ( SiteConfig(environment, version),
-      Environment(Local),
-      LogMessage(..),
-      jsonRequestLogger )
-import Site.Config
+    ( SiteConfig(version),
+      LogMessage(..) )
 import Site.Search ( indexContent )
 import Site.Types ( Resource )
 
