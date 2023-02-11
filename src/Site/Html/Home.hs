@@ -55,10 +55,10 @@ homeAboutContent = do
                                 , " as well as surfing, and spending time near the ocean."
                                 ]
   H.p $ H.toMarkup ("Reach me here: " :: T.Text)
-  H.a ! A.href "https://github.com/erewok" $
-    H.i ! A.class_ "fa-brands fa-github" $  "Github"
-  H.a ! A.href "https://fosstodon.org/web/@erewok" $
-    H.i ! A.class_ "fa-brands fa-mastodon" $  "Mastodon"
+  H.ul $ do
+    H.li $
+      H.a ! A.href "https://github.com/erewok" $
+        H.i ! A.class_ "fa-brands fa-github" $  "Github"
 
 
 homeProjectsSection :: [Types.Resource] -> Html

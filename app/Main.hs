@@ -1,7 +1,6 @@
 module Main where
 
 import           Data.Aeson
-import qualified Data.ByteString.Lazy.Char8 as LBS
 import           Data.Either
 import           Data.Time.Clock                       ( getCurrentTime )
 import           Data.Typeable

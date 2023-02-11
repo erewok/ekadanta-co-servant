@@ -7,11 +7,7 @@ import           Data.Text
 import           GHC.Generics
 import           RIO
 import           System.Envy
-import           System.Log.FastLogger      ( LoggerSet
-                                            , flushLogStr
-                                            , pushLogStr
-                                            , toLogStr
-                                            )
+import           System.Log.FastLogger      ( LoggerSet )
 
 type EkadantaApp = RIO EkadantaCtx
 
@@ -43,15 +39,13 @@ data SiteConfig = SiteConfig {
   , version       :: !Text
   , esHost        :: !Text
   , esPort        :: !Text
-  , emailUsername :: !Text
-  , emailPasswd   :: !Text
   , adminUsername :: !Text
   , adminPasswd   :: !Text
   , adminName     :: !Text
 } deriving (Generic, Show)
 
 instance DefConfig SiteConfig where
-  defConfig = SiteConfig Prod "test-version" "http://localhost" "9200" "user" "password" "admin" "admin-password" "me"
+  defConfig = SiteConfig Prod "test-version" "http://localhost" "9200" "admin" "admin-password" "me"
 
 instance FromEnv SiteConfig
 

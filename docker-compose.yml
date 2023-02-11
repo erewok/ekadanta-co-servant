@@ -8,8 +8,6 @@ services:
       VERSION: ${TAG}
       ES_HOST: elasticsearch
       ES_PORT: "9200"
-      EMAIL_USERNAME: "test@example.com"
-      EMAIL_PASSWD: "Secret"
       ADMIN_USERNAME: "admin"
       ADMIN_PASSWD: "secret"
       ADMIN_NAME: "Erik"
