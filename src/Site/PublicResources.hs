@@ -21,13 +21,12 @@ import           Site.Config
 import           Site.Exceptions
 import           Site.Search
 import           Site.Types
-import           Site.Html.Contact
 import           Site.Html.Home
 import           Site.Html.ContentDetail
 import           Site.Html.ContentList
 
 
-type PublicApi = 
+type PublicApi =
   "posts" :> SCE.Throws AppErrors :> Get '[HTML] Html
   :<|> "projects" :> SCE.Throws AppErrors :> Get '[HTML] Html
   :<|> "posts" :> Capture "pgNum" Int :> SCE.Throws AppErrors :> Get '[HTML] Html
@@ -36,10 +35,8 @@ type PublicApi =
   :<|> "projects" :> Capture "post_id" UUID.UUID :> SCE.Throws AppErrors :> Get '[HTML] Html
   :<|> "search" :> ReqBody '[FormUrlEncoded] SearchForm :> Post '[HTML] Html
   :<|> "about" :> Get '[HTML] Html
-  :<|> "contact" :>  Get '[HTML] Html
-  :<|> "contact" :> ReqBody '[FormUrlEncoded] ContactForm :> Post '[HTML] Html
   :<|> Get '[HTML] Html
-  
+
 
 publicHandlers :: ServerT PublicApi EkadantaApp
 publicHandlers =
@@ -51,8 +48,6 @@ publicHandlers =
   :<|> getResourceH
   :<|> searchResultsPostH
   :<|> aboutGetH
-  :<|> contactGetH
-  :<|> contactPostH
   :<|> homeH
 
 
@@ -109,19 +104,6 @@ aboutGetH = do
     Left err -> throwM ContentLoadFailure
     Right Nothing -> throwM MissingContent
     Right (Just post) -> pure $ contentDetailPage post
-
-
--- | Contact form page
-contactGetH :: EkadantaApp Html
-contactGetH = pure $ contactPage True
-
-
--- | Contact form post
-contactPostH :: ContactForm -> EkadantaApp Html
-contactPostH contactF = do
-  config        <- asks _getConfig
-  liftIO $ sendContact config contactF
-  pure $ redirectPage "/thanks"
 
 -- | Home page
 homeH :: EkadantaApp Html

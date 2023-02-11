@@ -6,3 +6,26 @@ This site has been built with the following tools and technologies:
 - [Servant](https://github.com/haskell-servant/servant)
 - Elasticsearch
 - Docker
+
+## Run Locally with GHC
+
+If you have a Haskell compiler, run:
+
+```sh
+$ cabal build
+
+```
+
+## Run Locally with docker-compose
+
+If you have Docker installed, you can build the Docker image and run this project like this:
+
+```sh
+$ docker build -t ekadanta-co:latest
+[+] Building 526.6s (19/19) FINISHED
+
+$ export TAG=latest
+
+$ docker-compose up
+
+```

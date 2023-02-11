@@ -1,9 +1,21 @@
-FROM debian:stretch-slim as builder
+FROM haskell:9.2.5-slim-buster as builder
 
 ENV LANG C.UTF-8
-SHELL ["/bin/bash", "-Eeuxo", "pipefail", "-c"]
 
-RUN apt-get update && \
+ENV PATH=/root/.cabal/bin:/root/.local/bin:/opt/cabal/3.8/bin:/opt/ghc/9.2.5/bin:$PATH \
+    APP_DIR=/opt/ekadanta-co/
+
+RUN mkdir -p "${APP_DIR}/bin"
+WORKDIR ${APP_DIR}
+# Copy build-required files
+COPY ekadanta-co.cabal README.md ${APP_DIR}/
+# Copy source code
+COPY . ${APP_DIR}
+
+# Build sys deps, build project deps, remove all afterward
+RUN savedAptMark="$(apt-mark showmanual)"; \
+    set -eEx; \
+    apt-get update; \
     apt-get install --no-install-recommends -y \
     build-essential \
     libffi-dev \
@@ -13,37 +25,15 @@ RUN apt-get update && \
     dirmngr \
     curl \
     ca-certificates \
-    netbase \
-    && rm -rf /var/lib/apt/lists/* \
-    && mkdir -p /opt/ekadanta-co/bin
+    netbase; \
+    cabal update && cabal build --only-dependencies; \
+    cabal install; \
+    apt-mark auto '.*' > /dev/null; \
+	apt-mark manual $savedAptMark; \
+	apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false; \
+    rm -rf /var/lib/apt/lists/*
 
-RUN echo 'deb http://downloads.haskell.org/debian stretch main' > /etc/apt/sources.list.d/ghc.list && \
-    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys BA3CBA3FFE22B574 && \
-    apt-get update && \
-    apt-get install -y --no-install-recommends ghc-8.10.2 cabal-install-3.2
-
-ENV PATH /root/.cabal/bin:/root/.local/bin:/opt/cabal/3.2/bin:/opt/ghc/8.10.2/bin:$PATH
-
-WORKDIR /opt/ekadanta-co/
-
-COPY ekadanta-co.cabal ChangeLog.md README.md /opt/ekadanta-co/
-
-RUN cabal update && cabal build --only-dependencies
-
-COPY . /opt/ekadanta-co
-
-RUN cabal install
-
-FROM debian:stretch-slim as base_os
-
-RUN apt-get update && \
-    apt-get install -y \
-    build-essential \
-    libffi-dev \
-    libgmp-dev \
-    curl \
-    ca-certificates \
-    netbase
+FROM debian:bullseye-slim as base_os
 
 COPY --from=builder /root/.cabal/bin/ekadanta-co /opt/ekadanta-co/bin/
 

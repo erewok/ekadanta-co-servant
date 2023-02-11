@@ -8,9 +8,12 @@ import Data.Aeson
       FromJSON(parseJSON),
       Result(..),
       Value(Number, Object, String),
-      ToJSON(toJSON) )
+      ToJSON(toJSON))
+import Data.Aeson.Key (fromText)
+import Data.Aeson.KeyMap
+    (fromList, KeyMap)
 import Data.Aeson.Lens
-    ( key, AsPrimitive(_String), AsValue(_Object, _Array) )
+    ( key, _String, AsValue(_Object, _Array) )
 import           Data.Aeson.Types         ( parseMaybe, parseEither, Result(..) )
 import           Data.Bifunctor           ( first )
 import           Data.Maybe               ( fromMaybe, fromJust, isNothing, mapMaybe )
@@ -83,12 +86,12 @@ pullHitsResources value =
   let
     sources =
       value
-        ^? key "hits"
-        . key "hits"
+        ^? key (fromText "hits")
+        . key (fromText "hits")
         . _Array
         ^.. folded
         . traverse
-        . key "_source"
+        . key (fromText "_source")
   in mapMaybe decodeMaybeResource sources
 
 decodeEitherResource :: Value -> Either Text Resource
@@ -101,7 +104,7 @@ pullAggsKey :: Text -> Value -> Maybe (Vector Value)
 pullAggsKey aggName esResult =
   esResult
     ^? key "aggregations"
-    . key aggName
+    . key (fromText aggName)
     . key "buckets"
     . _Array
 
@@ -130,30 +133,30 @@ searchAboutQ :: Value
 searchAboutQ = searchRecentResourcesQ About 1
 
 searchTagsQ :: [Text] -> Value
-searchTagsQ tags = Object $ HM.fromList [
-  ( "query"
-  ,  Object $ HM.fromList [
-    ("match",
-    Object $ HM.fromList [
-      ("_tags", Object $ HM.fromList [
-        ("query", String $ T.unwords tags),
-        ("operator", String "and" ) ]
+searchTagsQ tags = Object $ fromList [
+  (fromText "query"
+  ,  Object $ fromList [
+    (fromText "match",
+    Object $ fromList [
+      (fromText "_tags", Object $ fromList [
+        (fromText "query", String $ T.unwords tags),
+        (fromText "operator", String "and" ) ]
       ) ]
     ) ]
   ) ]
 
 searchContentQ :: Text -> Value
-searchContentQ query = Object $ HM.fromList [
+searchContentQ query = Object $ fromList [
   ( "query"
-  ,  Object $ HM.fromList [
+  ,  Object $ fromList [
     ("multi_match",
-    Object $ HM.fromList [ ("match", String query)
+    Object $ fromList [ ("match", String query)
                          , ("fields", toJSON ["_lede" :: Text, "_body" :: Text] ) ]
     )] )
   ]
 
 searchRecentResourcesQ :: ResourceType -> Int -> Value
-searchRecentResourcesQ rt n = Object $ HM.fromList [
+searchRecentResourcesQ rt n = Object $ fromList [
   ( "from", Number 0 )
   , ( "size", toJSON n )
   , ( "query", resourceTypeTerm rt )
@@ -167,55 +170,55 @@ type PageCount = Maybe Int
 type Offset = Int
 
 searchPaginatingQ :: ResourceType -> PageCount -> Offset -> Value
-searchPaginatingQ rt Nothing offset = Object $ HM.fromList [
+searchPaginatingQ rt Nothing offset = Object $ fromList [
   ( "from", toJSON offset )
   , ( "size", toJSON _DEFAULT_PAGE_COUNT )
   , ( "query", resourceTypeTerm rt )
   , ( "sort", pubDateDescSort )
-  , ("aggs", Object $ HM.fromList [ ("tags", tagsAgg), ("counts", docTypeCount) ] )
+  , ("aggs", Object $ fromList [ ("tags", tagsAgg), ("counts", docTypeCount) ] )
   ]
-searchPaginatingQ rt (Just count) offset = Object $ HM.fromList [
+searchPaginatingQ rt (Just count) offset = Object $ fromList [
   ( "from", toJSON offset )
   , ( "size", toJSON count )
   , ( "query", resourceTypeTerm rt )
   , ( "sort", pubDateDescSort )
-  , ("aggs", Object $ HM.fromList [ ("tags", tagsAgg), ("counts", docTypeCount) ] )
+  , ("aggs", Object $ fromList [ ("tags", tagsAgg), ("counts", docTypeCount) ] )
   ]
 
 matchAllQ :: PageCount -> Offset -> Value
-matchAllQ Nothing offset = Object $ HM.fromList [
+matchAllQ Nothing offset = Object $ fromList [
   ( "from", toJSON offset )
   , ( "size", toJSON _DEFAULT_PAGE_COUNT )
-  , ( "query", Object $ HM.fromList [("match_all", Object $ HM.fromList [])] )
+  , ( "query", Object $ fromList [("match_all", Object $ fromList [])] )
   , ( "sort", pubDateDescSort )
-  , ("aggs", Object $ HM.fromList [ ("tags", tagsAgg), ("counts", docTypeCount) ] )
+  , ("aggs", Object $ fromList [ ("tags", tagsAgg), ("counts", docTypeCount) ] )
   ]
-matchAllQ (Just count) offset = Object $ HM.fromList [
+matchAllQ (Just count) offset = Object $ fromList [
   ( "from", toJSON offset )
   , ( "size", toJSON count )
-  , ( "query", Object $ HM.fromList [("match_all", Object $ HM.fromList [])] )
+  , ( "query", Object $ fromList [("match_all", Object $ fromList [])] )
   , ( "sort", pubDateDescSort )
-  , ("aggs", Object $ HM.fromList [ ("tags", tagsAgg), ("counts", docTypeCount) ] )
+  , ("aggs", Object $ fromList [ ("tags", tagsAgg), ("counts", docTypeCount) ] )
   ]
 
 resourceTypeTerm :: ResourceType -> Value
-resourceTypeTerm rt = Object $ HM.fromList [
-  ( "term", Object $ HM.fromList [
+resourceTypeTerm rt = Object $ fromList [
+  ( "term", Object $ fromList [
     ( "_resourceType", String . T.pack . show $ rt )] )]
 
 pubDateDescSort :: Value
-pubDateDescSort = Object $ HM.fromList [
-  ( "_pubdate", Object $ HM.fromList [
+pubDateDescSort = Object $ fromList [
+  ( "_pubdate", Object $ fromList [
     ( "order", String "desc")])]
 
 tagsAgg :: Value
-tagsAgg = Object $ HM.fromList [
-  ( "terms", Object $ HM.fromList [
+tagsAgg = Object $ fromList [
+  ( "terms", Object $ fromList [
     ( "field", String "_tags"), ("size", Number 1000 )] )]
 
 docTypeCount :: Value
-docTypeCount = Object $ HM.fromList [
-  ( "terms", Object $ HM.fromList [
+docTypeCount = Object $ fromList [
+  ( "terms", Object $ fromList [
     ( "field", String "_resourceType" ), ("size", Number 5) ] )]
 
 -- | Client functions for interacting with our index/documents
