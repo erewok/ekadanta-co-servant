@@ -237,7 +237,6 @@ indexContent config (Just itemUid) item = do
   runSearchClient config $ indexer itemUid updatedItem
 
 
-
 getContent :: SiteConfig -> UUID.UUID -> IO (Either ClientError Value)
 getContent config uid =
   runSearchClient config
@@ -265,7 +264,7 @@ type SearchAPI =
   "ekadanta" :> QueryParam "include_type_name" Bool :> ReqBody '[JSON] Value :> Put '[JSON] Value
   :<|> "ekadanta" :> "_search" :> ReqBody '[JSON] Value :> Post '[JSON] Value
   :<|> "ekadanta" :> "_doc" :> Capture "docId" UUID.UUID :> Get '[JSON] Value
-  :<|> "ekadanta" :> "_doc" :> Capture "docId" UUID.UUID :> ReqBody '[JSON] Resource :> Put '[JSON] Value
+  :<|> "ekadanta" :> "_doc" :> Capture "docId" UUID.UUID :> ReqBody '[JSON] Resource :> Verb 'PUT 201 '[JSON] Value
 
 data SearchClient =
   SearchClient

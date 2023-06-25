@@ -42,7 +42,7 @@ main = do
   myKey <- generateKey
 
   let lgmsg = LogMessage {
-    message = "Ekadanta App Starting up"
+    message = "Ekadanta App Starting up on PORT [8000]"
     , timestamp = tstamp
     , lversion = version config
     , application = "ekadanta"
