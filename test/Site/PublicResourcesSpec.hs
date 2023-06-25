@@ -4,6 +4,8 @@ import qualified Control.Concurrent               as C
 import Control.DeepSeq ()
 import           Control.Exception                (evaluate)
 import Data.Aeson ( Value(Object, Array, String), ToJSON(toJSON) )
+import Data.Aeson.Key                             as Key
+import Data.Aeson.KeyMap (fromList)
 import Data.Aeson.Lens ()
 import           Data.Text.Encoding               ( encodeUtf8 )
 import qualified Data.UUID                        as UUID
@@ -25,7 +27,6 @@ import RIO
       bracket,
       runRIO,
       encodeUtf8 )
-import qualified RIO.HashMap                   as HM
 import qualified RIO.Vector                    as V
 import Servant
     ( type (:<|>)((:<|>)), Handler, Server, hoistServer, serve )
@@ -122,19 +123,19 @@ esTestServer =
 
 
 searchESIndex :: Value -> Handler Value
-searchESIndex (Object hmap) = pure $ Object $ HM.fromList [
-  ("hits", Object $ HM.fromList [
-    ("hits", Array $ V.fromList [Object $ HM.fromList [("_source", toJSON defaultPostSource)]] )
+searchESIndex (Object hmap) = pure $ Object $ fromList [
+  (Key.fromText "hits", Object $ fromList [
+    (Key.fromText "hits", Array $ V.fromList [Object $ fromList [((Key.fromText "_source"), toJSON defaultPostSource)]] )
     ] )
   ]
-searchESIndex _ = pure $ Object $ HM.fromList [("bad", String "data")]  -- This is how we signal a failing result
+searchESIndex _ = pure $ Object $ fromList [((Key.fromText "bad") , String "data")]  -- This is how we signal a failing result
 
 
 getESDocument :: UUID.UUID -> Handler Value
 getESDocument uid =
   if uid == UUID.nil -- This is how we single a failing result...
-    then pure . Object $ HM.fromList [("bad", String "data")]
-    else pure $ Object $ HM.fromList [("_source", defaultPostSource)]
+    then pure . Object $ fromList [((Key.fromText "bad"), String "data")]
+    else pure $ Object $ fromList [((Key.fromText "_source"), defaultPostSource)]
 
 defaultPostSource :: Value
 defaultPostSource =
