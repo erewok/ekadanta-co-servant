@@ -29,8 +29,8 @@ RUN savedAptMark="$(apt-mark showmanual)"; \
     cabal update && cabal build --only-dependencies; \
     cabal install; \
     apt-mark auto '.*' > /dev/null; \
-	apt-mark manual $savedAptMark; \
-	apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false; \
+    apt-mark manual $savedAptMark; \
+    apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false; \
     rm -rf /var/lib/apt/lists/*
 
 FROM debian:bullseye-slim as base_os
