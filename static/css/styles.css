@@ -531,6 +531,11 @@ Below the fold
     margin-bottom: 20px;
 }
 
+img[alt=linkedimg] {
+    max-width: 95%;
+    padding: auto;
+}
+
 
 /* * * * * * * * * * * * * * * * * * * * * *
 #

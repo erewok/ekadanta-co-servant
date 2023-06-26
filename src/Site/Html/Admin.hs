@@ -132,8 +132,8 @@ newContentItemForm = do
       H.div ! A.class_ "two columns" $ do
         H.label ! A.for "contentEncoding" $ "Resource Type"
         H.select ! A.class_ "u-fill-width" ! A.class_ "contentEncoding" ! A.name "_contentEncoding" $ do
-          H.option ! A.value "html" $ "Html"
           H.option ! A.value "markdown" $ "Markdown"
+          H.option ! A.value "html" $ "Html"
 
       H.div ! A.class_ "two columns" $ do
         H.label ! A.for "pubdate" $ "Publication Date"
