@@ -223,7 +223,7 @@ docTypeCount = Object $ fromList [
 
 -- | Client functions for interacting with our index/documents
 --   Generate a GUID if one is not supplied
-indexContent :: SiteConfig -> Maybe UUID.UUID -> Resource -> IO (Either ClientError Value)
+indexContent :: SiteConfig -> Maybe UUID.UUID -> Resource -> IO (Either ClientError (Union '[WithStatus 201 Value, WithStatus 200 Value]))
 indexContent config Nothing item = do
   -- CREATE A UUID for this Item
   nuid <- UUID4.nextRandom
@@ -264,7 +264,7 @@ type SearchAPI =
   "ekadanta" :> QueryParam "include_type_name" Bool :> ReqBody '[JSON] Value :> Put '[JSON] Value
   :<|> "ekadanta" :> "_search" :> ReqBody '[JSON] Value :> Post '[JSON] Value
   :<|> "ekadanta" :> "_doc" :> Capture "docId" UUID.UUID :> Get '[JSON] Value
-  :<|> "ekadanta" :> "_doc" :> Capture "docId" UUID.UUID :> ReqBody '[JSON] Resource :> Verb 'PUT 201 '[JSON] Value
+  :<|> "ekadanta" :> "_doc" :> Capture "docId" UUID.UUID :> ReqBody '[JSON] Resource :> UVerb 'PUT '[JSON] '[WithStatus 201 Value, WithStatus 200 Value]
 
 data SearchClient =
   SearchClient
@@ -272,7 +272,7 @@ data SearchClient =
   createSearchIndex :: Maybe Bool -> Value -> ClientM Value
   , searchIndexContent :: Value -> ClientM Value
   , getSearchContent :: UUID.UUID -> ClientM Value
-  , indexDocument :: UUID.UUID -> Resource -> ClientM Value
+  , indexDocument :: UUID.UUID -> Resource -> ClientM (Union '[WithStatus 201 Value, WithStatus 200 Value])
   }
 
 mkSearchClient :: SearchClient

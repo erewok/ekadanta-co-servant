@@ -29,7 +29,8 @@ import RIO
       encodeUtf8 )
 import qualified RIO.Vector                    as V
 import Servant
-    ( type (:<|>)((:<|>)), Handler, Server, hoistServer, serve )
+    ( type (:<|>)((:<|>)), Handler, Server, UVerb, hoistServer, serve )
+import Servant.API.UVerb (Union, WithStatus)
 import Servant.Server ()
 import           System.Log.FastLogger            ( newStdoutLoggerSet
                                                   , defaultBufSize
@@ -156,5 +157,5 @@ defaultPostSource =
 createESIndex :: Maybe Bool -> Value -> Handler Value
 createESIndex = undefined
 
-upsertESDocument :: UUID.UUID -> Resource -> Handler Value
+upsertESDocument :: UUID.UUID -> Resource -> Handler (Union '[WithStatus 201 Value, WithStatus 200 Value])
 upsertESDocument = undefined
