@@ -150,7 +150,7 @@ searchContentQ query = Object $ fromList [
   ( "query"
   ,  Object $ fromList [
     ("multi_match",
-    Object $ fromList [ ("match", String query)
+    Object $ fromList [ ("query", String query)
                          , ("fields", toJSON ["_lede" :: Text, "_body" :: Text] ) ]
     )] )
   ]
