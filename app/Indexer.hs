@@ -20,6 +20,7 @@ import RIO
       ExitCode(ExitFailure),
       LogLevel(..) )
 import RIO.Time (getCurrentTime)
+import Servant (Union, WithStatus)
 import System.Envy (decodeEnv, DefConfig(..))
 import System.Log.FastLogger
   ( newStdoutLoggerSet,
@@ -56,7 +57,7 @@ mkFailMsg ogLgMsg = do
     , level = RIO.LevelError
   }
 
-indexer :: LogMessage -> SiteConfig -> (LogMessage -> IO a) -> FilePath -> IO (Either T.Text Value)
+indexer :: LogMessage -> SiteConfig -> (LogMessage -> IO a) -> FilePath -> IO (Either T.Text (Union '[WithStatus 201 Value, WithStatus 200 Value]))
 indexer ogLgMsg config logger fp = do
   _ <- logger $ ogLgMsg { message = "Indexing document: " <> T.pack fp }
   maybeRes <- jsonFileToResource fp

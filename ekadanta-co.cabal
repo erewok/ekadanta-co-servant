@@ -173,6 +173,8 @@ executable ekadanta-indexer
     , envy
     , fast-logger
     , rio
+    , servant
     , servant-client
+    , servant-server
     , text
   default-language: Haskell2010
